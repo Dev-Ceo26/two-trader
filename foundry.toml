@@ -1,0 +1,26 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+solc = "0.8.27"
+optimizer = true
+optimizer_runs = 200
+ffi = true
+ast = true
+build_info = true
+extra_output = ["storageLayout"]
+
+[lint]
+exclude_lints = [
+    "low-level-calls",
+    "missing-events-access-control",
+    "reentrancy-events",
+    "custom-errors",
+    "arbitrary-send-eth",
+    "event-fields",
+    "boolean-cst"
+]
+
+[rpc_endpoints]
+imperium_mainnet = "https://rpc.imperiumscan.com"
+imperium_testnet = "https://rpc-testnet.imperiumscan.com"
