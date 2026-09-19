@@ -12,13 +12,16 @@ extra_output = ["storageLayout"]
 
 [lint]
 exclude_lints = [
+    "asm-keccak256",
+    "calls-loop",
     "low-level-calls",
     "missing-events-access-control",
     "reentrancy-events",
     "custom-errors",
     "arbitrary-send-eth",
     "event-fields",
-    "boolean-cst"
+    "boolean-cst",
+    "multi-contract-file"
 ]
 
 [rpc_endpoints]

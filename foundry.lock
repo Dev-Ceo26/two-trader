@@ -13,8 +13,8 @@
   },
   "lib/openzeppelin-contracts-upgradeable": {
     "tag": {
-      "name": "v5.7.0",
-      "rev": "14f52c54d3a1eefbda3d4071efba24d3c1e07e8a"
+      "name": "v5.0.2",
+      "rev": "723f8cab09cdae1aca9ec9cc1cfa040c2d4b06c1"
     }
   },
   "lib/openzeppelin-foundry-upgrades": {

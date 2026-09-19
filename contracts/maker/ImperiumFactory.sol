@@ -3,13 +3,13 @@ pragma solidity ^0.8.27;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ImperiumPair} from "./ImperiumPair.sol";
 
 /**
  * @title ImperiumFactory
  * @notice Factory per creare coppie AMM (ImperiumPair).
- * @dev UUPS upgradable, Ownable (transitorio). In futuro: DAO.
+ * @dev UUPS upgradable. createPair deploya IMPLEMENTATION + PROXY on-chain (nativo).
  */
 contract ImperiumFactory is UUPSUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_FEE_BPS = 1000; // 10% max
@@ -46,6 +46,10 @@ contract ImperiumFactory is UUPSUpgradeable, OwnableUpgradeable {
         emit DefaultFeeUpdated(oldBps, newBps);
     }
 
+    /**
+     * @notice Crea una nuova coppia AMM.
+     * @dev Deploya IMPLEMENTATION + ERC1967PROXY nativamente (funziona on-chain).
+     */
     function createPair(address tokenA, address tokenB)
         external
         onlyOwner
@@ -54,14 +58,22 @@ contract ImperiumFactory is UUPSUpgradeable, OwnableUpgradeable {
         require(tokenA != address(0) && tokenB != address(0), "zero token");
         require(tokenA != tokenB, "same token");
 
-        (address t0, address t1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        (address t0, address t1) = tokenA < tokenB
+            ? (tokenA, tokenB)
+            : (tokenB, tokenA);
         require(getPair[t0][t1] == address(0), "pair exists");
 
-        pair = Upgrades.deployUUPSProxy(
-            "ImperiumPair.sol:ImperiumPair",
-            abi.encodeCall(ImperiumPair.initialize, (t0, t1, owner(), defaultFeeBps))
-        );
+        // 1. Deploy implementation
+        ImperiumPair impl = new ImperiumPair();
 
+        // 2. Deploy proxy + initialize
+        bytes memory initData = abi.encodeCall(
+            ImperiumPair.initialize,
+            (t0, t1, owner(), defaultFeeBps)
+        );
+        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
+
+        pair = address(proxy);
         getPair[t0][t1] = pair;
         allPairs.push(pair);
 
