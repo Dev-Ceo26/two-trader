@@ -38,15 +38,18 @@ contract TestSwap is Script {
         IERC20(mockUsdc).approve(router, type(uint256).max);
 
         // 3) SWAP REALE: 10 MockUSDC -> tIMP
-        // token0 = MockUSDC, token1 = tIMP
-        // zeroForOne = true: scambia token0 per token1
+        // L'ordine dei token dipende dagli indirizzi:
+        //   token0 = tIMP   (0x0B30...)
+        //   token1 = MockUSDC (0x6101...)
+        // Quindi USDC e' token1. Per scambiare token1 -> token0:
+        //   zeroForOne = false
         uint256 amountIn = 10 * 10 ** 6; // 10 MockUSDC
 
-        console2.log("Swapping 10 MockUSDC for tIMP...");
+        console2.log("Swapping 10 MockUSDC (token1) for tIMP (token0)...");
 
         ImperiumRouter(router).swapExactInput(
             key,
-            true,           // zeroForOne
+            false,          // zeroForOne = false: token1 -> token0
             amountIn,       // amountIn
             0,              // amountOutMin
             deployer,       // recipient

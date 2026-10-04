@@ -1,0 +1,64 @@
+# Bug di configurazione prezzo pool — 2026-10-04
+
+## Sintomo
+
+Dopo `AddLiquidity` e `TestSwap` su anvil:
+- Deployer USDC: ~10.999.180 (pagato ~10 USDC)
+- Deployer tIMP: ~209.999.999,999 (ricevuto ~1000 tIMP)
+- Pool USDC: ~1.019
+- Pool tIMP: 1 wei
+
+**Il pool ha dato ~1000 tIMP per 10 USDC.** Prezzo effettivo: ~100 tIMP/USDC.
+
+## Causa
+
+Il pool ordina i token per **indirizzo**:
+- `token0 = tIMP (0x0B30..., 18 dec)`
+- `token1 = MockUSDC (0x6101..., 6 dec)`
+
+Per avere 1:1 in valore:
+1 tIMP (1e18) = 1 USDC (1e6)
+amount1/amount0 = 1e6 / 1e18 = 1e-12
+sqrtPriceX96 = 2^96 * sqrt(1e-12) = 2^96 * 1e-6
+
+text
+
+Ma `CreatePoolWithHook.s.sol` usa:
+sqrtPriceX96 = 2^96 * 1e6
+
+text
+
+Il prezzo e' 1e12 volte piu' grande del dovuto.
+
+## Fix proposto
+
+`CreatePoolWithHook.s.sol` deve calcolare `sqrtPriceX96` in base all'ordine dei token:
+
+```solidity
+uint160 sqrtPriceX96;
+if (timp < mockUsdc) {
+    // token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
+    // 1 tIMP = 1 USDC (in valore) → sqrtPriceX96 = 2^96 * 1e-6
+    sqrtPriceX96 = 79228162514264337593543; // 2^96 / 1e6
+} else {
+    // token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
+    // 1 USDC = 1 tIMP → sqrtPriceX96 = 2^96 * 1e6
+    sqrtPriceX96 = 79228162514264337593543950336000000; // 2^96 * 1e6
+}
+E AddLiquidity.s.sol deve calcolare tickLower/tickUpper in base al prezzo.
+
+Nota
+Il DEX e' tecnicamente funzionante: pool creato, liquidita' aggiunta,
+swap eseguito, hook chiamato, token trasferiti. Il problema e' solo
+nel prezzo iniziale del pool, che va calcolato in base all'ordine dei token.
+
+Il fix richiede un reset di anvil e un redeploy completo.
+
+Contratti (anvil, deploy corrente)
+Contratto	Indirizzo
+MockUSDC	0x610178dA211FEF7D417bC0e6FeD39F05609AD788
+tIMP (proxy)	0x0B306BF915C4d645ff596e518fAf3F9669b97016
+PoolManager (proxy)	0x4A679253410272dd5232B3Ff7cF5dbB88f295319
+ImperiumRouter	0x7a2088a1bFc9d81c55368AE168C2C02570cB814F
+ImperiumHooks	0xF30458e23336f15931bC1658b5c7C6Ec5b3a40c0
+Pool: tIMP/MockUSDC, fee 3000, tickSpacing 60, hook 0xF30458...

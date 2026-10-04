@@ -35,13 +35,27 @@ contract AddLiquidity is Script {
         IERC20(mockUsdc).approve(router, type(uint256).max);
         console2.log("Approved router");
 
-        // Range PICCOLO: -60, +60 (0.30% fee)
-        int24 tickLower = -60;
-        int24 tickUpper = 60;
+        // Range intorno al tick corrente del pool (276324).
+        // tickSpacing = 60, quindi tickLower/tickUpper devono essere
+        // multipli di 60.
+        int24 tickLower = 276240;
+        int24 tickUpper = 276420;
 
-        uint160 sqrtPriceX96 = 79228162514264337593543950336;
-        uint256 amount0 = 1_000 * 10 ** 6;   // 1000 MockUSDC
-        uint256 amount1 = 1_000 * 10 ** 18;  // 1000 tIMP
+        // sqrtPriceX96 del pool: 2^96 * 1e6 (impostato in CreatePoolWithHook)
+        uint160 sqrtPriceX96 = 79228162514264337593543950336000000;
+        // amount0/amount1 dipendono dall'ordine dei token nel PoolKey.
+        // Il PoolKey ordina per indirizzo, non per decimali.
+        uint256 amount0;
+        uint256 amount1;
+        if (uint160(timp) < uint160(mockUsdc)) {
+            // token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
+            amount0 = 1_000 * 10 ** 18;
+            amount1 = 1_000 * 10 ** 6;
+        } else {
+            // token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
+            amount0 = 1_000 * 10 ** 6;
+            amount1 = 1_000 * 10 ** 18;
+        }
 
         console2.log("Adding liquidity (range -60/+60)...");
 
