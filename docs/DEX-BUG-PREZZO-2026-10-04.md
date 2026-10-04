@@ -62,3 +62,44 @@ PoolManager (proxy)	0x4A679253410272dd5232B3Ff7cF5dbB88f295319
 ImperiumRouter	0x7a2088a1bFc9d81c55368AE168C2C02570cB814F
 ImperiumHooks	0xF30458e23336f15931bC1658b5c7C6Ec5b3a40c0
 Pool: tIMP/MockUSDC, fee 3000, tickSpacing 60, hook 0xF30458...
+
+---
+
+## Aggiornamento 3 — Analisi finale
+
+### Cosa è corretto
+
+- `ImperiumPoolManager` e' un PoolManager V4 completo (usa Pool.State, SafeCast, CustomRevert)
+- L'hook `beforeSwap` ritorna `BeforeSwapDeltaLibrary.ZERO_DELTA` (neutro)
+- Tick del pool: -276324 (corretto)
+- Prezzo: 1e-12 (corretto, 1 tIMP = 1 USDC)
+- Flusso: deposit → swap → transfer (corretto)
+
+### Cosa non torna
+
+Con:
+- Range: [-286320, -266340]
+- Liquidita': 100.000 tIMP + 100.000 USDC
+- Swap: 10 USDC
+
+Il pool restituisce 102,8 tIMP invece di ~10 tIMP.
+
+### Prossimo passo
+
+Scrivere un test Foundry che isola il calcolo:
+
+    test/v4/SwapRatio.t.sol
+
+Il test logga:
+- L calcolato da LiquidityAmounts.getLiquidityForAmounts
+- sqrtP effettivo
+- delta.amount0(), delta.amount1()
+- assertEq(delta.amount1(), 10e18)
+
+Con il log, si identifica dove il calcolo diverge.
+
+### Nota
+
+Il `cast call getSlot0` non funziona su `ImperiumPoolManager`
+(usa `Extsload` invece di una funzione esplicita).
+Per leggere lo stato del pool on-chain, serve `extsload` con la chiave corretta.
