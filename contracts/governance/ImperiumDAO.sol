@@ -23,10 +23,11 @@ contract ImperiumDAO is
         TimelockController _timelock,
         uint48 _votingDelay,
         uint32 _votingPeriod,
+        uint256 _proposalThreshold,
         uint256 _quorumPercent
     )
         Governor("ImperiumDAO")
-        GovernorSettings(_votingDelay, _votingPeriod, 0)
+        GovernorSettings(_votingDelay, _votingPeriod, _proposalThreshold)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(_quorumPercent)
         GovernorTimelockControl(_timelock)
