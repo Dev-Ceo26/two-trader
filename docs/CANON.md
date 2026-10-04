@@ -1,6 +1,6 @@
 # CANON — Imperium Decision Canon
 
-> Versione: 1.0 (Beta, Fase A)
+> Versione: 1.1 (Beta, Fase A)
 > Ultimo aggiornamento: 2026-10-04
 > Contratto di riferimento: `contracts/decisions/DecisionLib.sol`
 
@@ -10,214 +10,253 @@ Questo documento definisce la **grammatica delle decisioni** che attraversano il
 
 ## 1. La struct `Decision`
 
-```solidity
-struct Decision {
-    uint8   kind;
-    address actor;
-    address token;
-    address recipient;
-    uint256 amount;
-    uint256 nonce;
-    uint256 srcChainId;
-    uint256 dstChainId;
-    uint64  deadline;
-    bytes32 rationaleHash;
-}
-Ordine dei campi è parte del canone. Cambiarlo invalida ogni firma esistente. Mai cambiare l'ordine. Mai rimuovere un campo. Solo aggiungere in coda, e solo con bump di versione esplicito.
+    struct Decision {
+        uint8   kind;
+        address actor;
+        address token;
+        address recipient;
+        uint256 amount;
+        uint256 nonce;
+        uint256 srcChainId;
+        uint256 dstChainId;
+        uint64  deadline;
+        bytes32 rationaleHash;
+    }
 
-Campo per campo
-Campo	Tipo	Vincoli	Descrizione
-kind	uint8	uno dei KIND_* sotto	Tipo di decisione
-actor	address	≠ address(0)	Chi ha originato la decisione (msg.sender on-chain)
-token	address	vedi kind	Token coinvolto (address(0) se non applicabile)
-recipient	address	vedi kind	Destinatario (address(0) se non applicabile)
-amount	uint256	vedi kind	Importo (0 se non applicabile)
-nonce	uint256	unico per (actor, kind)	Anti-replay
-srcChainId	uint256	≠ 0	Catena di origine
-dstChainId	uint256	≠ 0	Catena di destinazione
-deadline	uint64	≠ 0	Dopo questo timestamp, la firma è invalida
-rationaleHash	bytes32	≠ 0	keccak256 di una spiegazione umana off-chain
-2. I kind ammessi
-Valore	Costante	Uso	Campi obbligatori
-1	KIND_DEPOSIT	Lock su root, release su child	token, recipient, amount
-2	KIND_WITHDRAW	Lock su child, release su root	token, recipient, amount
-3	KIND_REGISTER_TOKEN	Registrazione token supportato	token
-4	KIND_EMERGENCY	Azione di emergenza	nessuno specifico
-Aggiungere un nuovo kind richiede:
+**L'ordine dei campi è parte del canone.** Cambiarlo invalida ogni firma esistente. Mai cambiare l'ordine. Mai rimuovere un campo. Solo aggiungere in coda, e solo con bump di versione esplicito.
 
-Aggiungere la costante in DecisionLib.sol
+### Campo per campo
 
-Aggiungere i vincoli in DecisionLib.validate
+| Campo | Tipo | Vincoli | Descrizione |
+|---|---|---|---|
+| `kind` | uint8 | uno dei `KIND_*` sotto | Tipo di decisione |
+| `actor` | address | diverso da address(0) | Chi ha originato la decisione (msg.sender on-chain) |
+| `token` | address | vedi kind | Token coinvolto (address(0) se non applicabile) |
+| `recipient` | address | vedi kind | Destinatario (address(0) se non applicabile) |
+| `amount` | uint256 | vedi kind | Importo (0 se non applicabile) |
+| `nonce` | uint256 | unico per (actor, kind) | Anti-replay |
+| `srcChainId` | uint256 | diverso da 0 | Catena di origine |
+| `dstChainId` | uint256 | diverso da 0 | Catena di destinazione |
+| `deadline` | uint64 | diverso da 0 | Dopo questo timestamp, la firma è invalida |
+| `rationaleHash` | bytes32 | diverso da 0 | keccak256 di una spiegazione umana off-chain |
 
-Aggiornare questo documento
+---
 
-Aggiungere un test in test/decisions/
+## 2. I `kind` ammessi
 
-3. L'hash canonico
-solidity
-function hash(Decision memory d) internal pure returns (bytes32) {
-    return keccak256(abi.encode(
-        d.kind, d.actor, d.token, d.recipient,
-        d.amount, d.nonce, d.srcChainId, d.dstChainId,
-        d.deadline, d.rationaleHash
-    ));
-}
+| Valore | Costante | Uso | Campi obbligatori |
+|---|---|---|---|
+| 1 | `KIND_DEPOSIT` | Lock su root, release su child | token, recipient, amount |
+| 2 | `KIND_WITHDRAW` | Lock su child, release su root | token, recipient, amount |
+| 3 | `KIND_REGISTER_TOKEN` | Registrazione token supportato | token |
+| 4 | `KIND_EMERGENCY` | Azione di emergenza | nessuno specifico |
+
+**Aggiungere un nuovo `kind` richiede:**
+1. Aggiungere la costante in `DecisionLib.sol`
+2. Aggiungere i vincoli in `DecisionLib.validate`
+3. Aggiornare questo documento
+4. Aggiungere un test in `test/decisions/`
+
+---
+
+## 3. L'hash canonico
+
+    function hash(Decision memory d) internal pure returns (bytes32) {
+        return keccak256(abi.encode(
+            d.kind, d.actor, d.token, d.recipient,
+            d.amount, d.nonce, d.srcChainId, d.dstChainId,
+            d.deadline, d.rationaleHash
+        ));
+    }
+
 Questo hash è:
+- **L'ID della decisione** nel `DecisionRegistry`
+- **Il messaggio firmato** dai guardian
+- **La chiave anti-replay** (`processedDecisions[id]` nei bridge)
 
-L'ID della decisione nel DecisionRegistry
+**Cambiare i campi o l'ordine cambia l'hash e invalida tutte le firme esistenti.**
 
-Il messaggio firmato dai guardian (via toEthSignedMessageHash)
+Verifica ricorrente:
 
-La chiave anti-replay (processedDecisions[id] nei bridge)
+    cast keccak $(cast abi-encode "f(uint8,address,address,address,uint256,uint256,uint256,uint256,uint64,bytes32)" \
+      $KIND $ACTOR $TOKEN $RECIPIENT $AMOUNT $NONCE $SRC $DST $DEADLINE $RATIONALE)
 
-Cambiare i campi o l'ordine cambia l'hash e invalida tutte le firme esistenti.
+deve restituire esattamente il `DID` emesso nell'evento `DecisionRecorded`.
 
-4. rationaleHash — la spiegazione umana
-rationaleHash è l'unico campo che non ha effetto diretto on-chain. È un hash. Ma è parte del canone perché lega ogni decisione a una spiegazione leggibile.
+---
 
-Convenzione (v1.0):
+## 4. `rationaleHash` — la spiegazione umana
 
-rationaleHash = keccak256(abi.encodePacked("deposit", actor, token, recipient, amount, nonce)) per deposit
+`rationaleHash` è l'unico campo che non ha effetto diretto on-chain. È un hash. Ma è parte del canone perché **lega ogni decisione a una spiegazione leggibile**.
 
-rationaleHash = keccak256(abi.encodePacked("withdraw", actor, token, recipient, amount, nonce)) per withdraw
+**Convenzione (v1.1):**
 
-Questo è il minimo. In futuro, rationaleHash potrà puntare a un documento IPFS o a un URL versionato. La regola: chi firma deve poter verificare che l'hash corrisponda a una spiegazione che comprende.
+- `rationaleHash = keccak256(abi.encodePacked("deposit", actor, token, recipient, amount, nonce))` per deposit
+- `rationaleHash = keccak256(abi.encodePacked("withdraw", actor, token, recipient, amount, nonce))` per withdraw
 
-Nessuna decisione senza rationaleHash ≠ 0. Se non sai spiegare cosa stai firmando, non stai firmando.
+Questo è il **minimo**. In futuro, `rationaleHash` potrà puntare a un documento IPFS o a un URL versionato. La regola: chi firma **deve poter verificare** che l'hash corrisponda a una spiegazione che comprende.
 
-5. Il ciclo di vita di una decisione
-text
-1. PROPOSAL       Il bridge (o un attore autorizzato) costruisce una Decision
-                  e chiama messenger.recordDecision(d).
-                  → evento DecisionRecorded(id, d) nel DecisionRegistry
+**Nessuna decisione senza `rationaleHash` diverso da zero.** Se non sai spiegare cosa stai firmando, non stai firmando.
 
-2. FIRMA          I guardian leggono l'evento, verificano rationaleHash,
-                  e firmano l'hash canonico (id).
-                  → firme fuori catena (ECDSA, eth_sign)
+---
 
-3. VERIFICA       Chiunque chiama messenger.verifyDecision(d, signatures).
-                  Restituisce true se e solo se:
-                  - messenger non in pausa
-                  - DecisionLib.validate(d) == true
-                  - !DecisionLib.isExpired(d, now)
-                  - decisionRegistry.isRecorded(id) == true
-                  - decisionRegistry.isVetoed(id) == false
-                  - almeno threshold firme valide da guardian attivi distinti
+## 5. Il ciclo di vita di una decisione
 
-4. ESECUZIONE     Il bridge chiama executeWithdrawal / finalizeDeposit.
-                  → trasferimento token
-                  → processedDecisions[id] = true (anti-replay)
+    1. PROPOSAL       Il bridge costruisce una Decision e chiama messenger.recordDecision(d).
+                      → evento DecisionRecorded(id, d) nel DecisionRegistry
+                      → evento DecisionRecordedViaMessenger(id, d) nel Messenger
 
-5. VETO           In qualsiasi momento dopo la registrazione,
-                  VETO_ROLE può chiamare decisionRegistry.veto(id, reason).
-                  → la decisione non è più verificabile
-                  → evento DecisionVetoed pubblico
-6. Veto
-Chi ha VETO_ROLE:
+    2. FIRMA          I guardian leggono l'evento, verificano rationaleHash,
+                      e firmano l'id canonico (ETH personal_sign di id).
 
-Fase A (attuale): il deployer
+    3. VERIFICA       Chiunque chiama messenger.verifyDecision(d, signatures).
+                      Restituisce true se e solo se:
+                      - messenger non in pausa
+                      - DecisionLib.validate(d) == true
+                      - !DecisionLib.isExpired(d, now)
+                      - decisionRegistry.isRecorded(id) == true
+                      - decisionRegistry.isVetoed(id) == false
+                      - almeno threshold firme valide da guardian attivi distinti
 
-Fase C (futura): il Timelock del DAO, o un Safe dedicato
+    4. ESECUZIONE     Il bridge chiama executeWithdrawal / finalizeDeposit.
+                      → trasferimento token
+                      → processedDecisions[id] = true (anti-replay)
 
-Il veto è irreversibile. Non esiste unveto. Una volta vetata, una decisione resta vetata per sempre.
+    5. VETO           In qualsiasi momento dopo la registrazione,
+                      VETO_ROLE può chiamare decisionRegistry.veto(id, reason).
+                      → la decisione non è più verificabile
 
-Effetto del veto:
+---
 
-verifyDecision restituisce false anche con 5/5 firme valide
+## 6. Veto
 
-executeWithdrawal / finalizeDeposit reverta
+**Chi ha `VETO_ROLE`:**
+- Fase A (attuale): il deployer
+- Fase C (futura): il Timelock del DAO, o un Safe dedicato
 
-Il token resta nel bridge
+**Il veto è irreversibile.** Non esiste `unveto`. Una volta vetata, una decisione resta vetata per sempre.
 
-Conseguenza sui firmatari: chi ha firmato una decisione poi vetata ha firmato male. La politica di slashing (futura, non in questa versione) prevederà una penalità proporzionale allo stake. Per ora, il veto è un segnale pubblico: il firmatario è tracciato.
+**Effetto del veto:**
+- `verifyDecision` restituisce `false` anche con 5/5 firme valide
+- `executeWithdrawal` / `finalizeDeposit` reverta
+- Il token resta nel bridge
 
-7. Scadenze
-Regola dura: deadline ≠ 0. Ogni decisione ha una scadenza. Nessuna decisione eterna.
+**Conseguenza sui firmatari:** chi ha firmato una decisione poi vetata ha firmato male. La politica di slashing (futura) prevederà una penalità proporzionale allo stake. Per ora, il veto è un segnale pubblico: il firmatario è tracciato.
 
-Deadline di default: 1 ora dalla costruzione (DEFAULT_DEADLINE = 1 hours).
+---
 
-Perché: una decisione senza scadenza è una firma in bianco. Se il contesto cambia (prezzo, saldo, altro), la firma vecchia resta valida per sempre. Inaccettabile.
+## 7. Scadenze
 
-Chi decide la deadline: il bridge, al momento della costruzione. Non l'utente. Non il guardian. Così è uniforme per kind.
+**Regola dura: `deadline` diverso da zero.** Ogni decisione ha una scadenza. Nessuna decisione eterna.
 
-Verifica: DecisionLib.isExpired(d, block.timestamp). Se now > deadline, la decisione è morta.
+**Deadline di default:** 1 ora dalla costruzione (`DEFAULT_DEADLINE = 1 hours`).
 
-8. Threshold e firme
-Threshold attuale: 3 su 5 (configurato in initialize del messenger, modificabile via setThreshold dal governor).
+**Perché:** una decisione senza scadenza è una firma in bianco. Se il contesto cambia (prezzo, saldo, altro), la firma vecchia resta valida per sempre. Inaccettabile.
 
-Regole di conteggio:
+**Chi decide la deadline:** il bridge, al momento della costruzione. Non l'utente. Non il guardian. Così è uniforme per kind.
 
-Una firma conta solo se il firmatario è registry.isActiveGuardian(signer) == true al momento della verifica
+**Verifica:** `DecisionLib.isExpired(d, block.timestamp)`. Se `now > deadline`, la decisione è morta.
 
-Firme duplicate (stesso firmatario) contano una sola volta
+---
 
-Firme da non-guardian sono ignorate (non invalidano il messaggio, semplicemente non contano)
+## 8. Threshold e firme
 
-Firme in eccesso rispetto a threshold sono accettate
+**Threshold attuale:** 3 su 5 (configurato in `initialize` del messenger, modificabile via `setThreshold` dal governor).
 
-Cosa significa in pratica: un guardian rimosso dopo aver firmato non conta più. Questo è intenzionale: se un guardian viene disattivato per comportamento scorretto, le sue firme passate non valgono più come peso attuale.
+**Regole di conteggio:**
+- Una firma conta solo se il firmatario è `registry.isActiveGuardian(signer) == true` **al momento della verifica**
+- Firme duplicate (stesso firmatario) contano **una sola volta**
+- Firme da non-guardian sono ignorate (non invalidano il messaggio, semplicemente non contano)
+- Firme in eccesso rispetto a threshold sono accettate
 
-9. Ruoli on-chain
-Ruolo	Dove	Chi lo ha	Cosa può fare
-GOVERNOR_ROLE	GuardianRegistry, DecisionRegistry, Messenger, BridgeRoot, BridgeChild	Deployer (Fase A) → Timelock (Fase C)	Upgrade, cambio parametri, grant/revoke ruoli
-VETO_ROLE	DecisionRegistry	Deployer (Fase A) → Safe dedicato (Fase C)	Vetare decisioni
-EMERGENCY_ROLE	Messenger, BridgeRoot, BridgeChild	Deployer (Fase A) → Safe emergenza (Fase C)	Solo pausa, niente altro
-DEFAULT_ADMIN_ROLE	Tutti	Deployer (Fase A) → Timelock (Fase C)	Grant/revoke degli altri ruoli
-Principio: nessun ruolo è permanente. Tutti passano dal deployer (Fase A) al DAO o a Safe dedicati (Fase C) con transazioni pubbliche.
+**Cosa significa in pratica:** un guardian rimosso dopo aver firmato non conta più. Questo è intenzionale: se un guardian viene disattivato per comportamento scorretto, le sue firme passate non valgono più come peso attuale.
 
-10. Cosa NON è nel canone
+### 8.1 Come si firma — regola operativa
+
+**Il messaggio firmato è `id = DecisionLib.hash(d)`.** La firma è ECDSA standard su `id` con prefisso Ethereum (0x19 "Ethereum Signed Message:\n32").
+
+**Con `cast` (riga di comando):**
+
+    cast wallet sign --private-key <PK> $DID
+
+`cast` applica il prefisso Ethereum automaticamente. **NON** usare `--no-hash` sull'eth-hash precalcolato. **NON** calcolare il prefisso a mano. Il comando corretto è firmare **`$DID`** direttamente.
+
+**Verifica:**
+
+    cast wallet verify --address <ATTESO> $DID $FIRMA
+
+Deve restituire `Validation succeeded`.
+
+**Con ethers.js:**
+
+    const id = computeDecisionHash(decision);
+    const signature = await wallet.signMessage(ethers.getBytes(id));
+
+Stessa regola: firma il `$DID` come **messaggio**, non come digest. `signMessage` applica il prefisso Ethereum.
+
+**Lezione dal collaudo 2026-10-04:** le firme prodotte con `cast wallet sign --no-hash $ETH_HASH` sono state **rifiutate** dal messenger. La firma corretta è sempre `cast wallet sign $DID`.
+
+---
+
+## 9. Ruoli on-chain
+
+| Ruolo | Dove | Chi lo ha | Cosa può fare |
+|---|---|---|---|
+| `GOVERNOR_ROLE` | GuardianRegistry, DecisionRegistry, Messenger, BridgeRoot, BridgeChild | Deployer (Fase A) → Timelock (Fase C) | Upgrade, cambio parametri, grant/revoke ruoli |
+| `VETO_ROLE` | DecisionRegistry | Deployer (Fase A) → Safe dedicato (Fase C) | Vetare decisioni |
+| `EMERGENCY_ROLE` | Messenger, BridgeRoot, BridgeChild, GuardianRegistry | Deployer (Fase A) → Safe emergenza (Fase C) | Solo pausa e deactivateGuardian |
+| `DEFAULT_ADMIN_ROLE` | Tutti | Deployer (Fase A) → Timelock (Fase C) | Grant/revoke degli altri ruoli |
+
+**Principio:** nessun ruolo è permanente. Tutti passano dal deployer (Fase A) al DAO o a Safe dedicati (Fase C) con transazioni pubbliche.
+
+---
+
+## 10. Cosa NON è nel canone
+
 Esplicitamente fuori dal canone:
 
-Payload bytes opachi. Vietati.
+- **Payload `bytes` opachi.** Vietati.
+- **Decisioni senza `rationaleHash`.** Vietate.
+- **Decisioni senza `deadline`.** Vietate.
+- **Firme su hash non canonici.** Ignorate.
+- **`verifySignatures(bytes32, bytes[])`** — la vecchia API è stata rimossa.
+- **Aggirare il DecisionRegistry** per eseguire azioni del bridge. Vietato.
 
-Decisioni senza rationaleHash. Vietate.
+---
 
-Decisioni senza deadline. Vietate.
+## 11. Versionamento
 
-Firme su hash non canonici. Ignorate.
+**Versione corrente: 1.1.**
 
-verifySignatures(bytes32, bytes[]) — la vecchia API è stata rimossa.
+Cambiamenti ammessi **senza bump di versione:**
+- Aggiunta di nuovi `kind` (con aggiornamento di `validate` e di questo documento)
+- Aggiunta di commenti in `DecisionLib.sol`
 
-Aggirare il DecisionRegistry per eseguire azioni del bridge. Vietato.
+Cambiamenti che **richiedono bump di versione:**
+- Aggiunta di un campo alla struct (in coda)
+- Cambio di un vincolo in `validate`
+- Cambio del formato di `rationaleHash`
 
-11. Versionamento
-Versione corrente: 1.0.
+Cambiamenti **vietati:**
+- Rimuovere un campo
+- Cambiare l'ordine dei campi
+- Cambiare la formula dell'hash
 
-Cambiamenti ammessi senza bump di versione:
+---
 
-Aggiunta di nuovi kind (con aggiornamento di validate e di questo documento)
+## 12. Riferimenti
 
-Aggiunta di commenti in DecisionLib.sol
+- `contracts/decisions/DecisionLib.sol` — definizione canonica
+- `contracts/decisions/DecisionRegistry.sol` — registro e veto
+- `contracts/bridge/ImperiumMessenger.sol` — verifica firme
+- `contracts/bridge/ImperiumBridgeRoot.sol` — bridge lato L1
+- `contracts/bridge/ImperiumBridgeChild.sol` — bridge lato L2
+- `contracts/governance/GuardianRegistry.sol` — stake e ruoli guardian
+- `test/decisions/DecisionCanon.t.sol` — invarianti verificati
+- `docs/COLLAUDO-2026-10-04.md` — collaudo end-to-end su anvil
 
-Cambiamenti che richiedono bump di versione:
+---
 
-Aggiunta di un campo alla struct (in coda)
+**Fine del canone v1.1.**
 
-Cambio di un vincolo in validate
-
-Cambio del formato di rationaleHash
-
-Cambiamenti vietati:
-
-Rimuovere un campo
-
-Cambiare l'ordine dei campi
-
-Cambiare la formula dell'hash
-
-12. Riferimenti
-contracts/decisions/DecisionLib.sol — definizione canonica
-
-contracts/decisions/DecisionRegistry.sol — registro e veto
-
-contracts/bridge/ImperiumMessenger.sol — verifica firme
-
-contracts/bridge/ImperiumBridgeRoot.sol — bridge lato L1
-
-contracts/bridge/ImperiumBridgeChild.sol — bridge lato L2
-
-test/decisions/DecisionCanon.t.sol — invarianti verificati
-
-Fine del canone v1.0.
-
-Chi legge questo documento e il codice DecisionLib.sol deve poter capire, senza altre fonti, cosa è una decisione, come si firma, come si verifica, e cosa la può fermare.
+Chi legge questo documento e il codice `DecisionLib.sol` deve poter capire, senza altre fonti, cosa è una decisione, come si firma, come si verifica, e cosa la può fermare.
