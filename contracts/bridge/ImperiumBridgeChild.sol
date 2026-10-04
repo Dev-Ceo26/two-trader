@@ -123,7 +123,9 @@ contract ImperiumBridgeChild is
             srcChainId:    thisChainId,
             dstChainId:    l1ChainId,
             deadline:      uint64(block.timestamp) + DEFAULT_DEADLINE,
-            rationaleHash: keccak256(abi.encodePacked("withdraw", msg.sender, token, recipient, amount, nonce))
+            rationaleHash: keccak256(abi.encodePacked("withdraw", msg.sender, token, recipient, amount, nonce)),
+            fee:           0,
+            feeRecipient:  address(0)
         });
 
         bytes32 id = messenger.recordDecision(d);

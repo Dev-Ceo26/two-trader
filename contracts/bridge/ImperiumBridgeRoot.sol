@@ -122,7 +122,9 @@ contract ImperiumBridgeRoot is
             srcChainId:    thisChainId,
             dstChainId:    l2ChainId,
             deadline:      uint64(block.timestamp) + DEFAULT_DEADLINE,
-            rationaleHash: keccak256(abi.encodePacked("deposit", msg.sender, token, recipient, amount, nonce))
+            rationaleHash: keccak256(abi.encodePacked("deposit", msg.sender, token, recipient, amount, nonce)),
+            fee:           0,
+            feeRecipient:  address(0)
         });
 
         bytes32 id = messenger.recordDecision(d);

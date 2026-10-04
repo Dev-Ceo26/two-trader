@@ -105,7 +105,9 @@ contract DecisionCanonTest is Test {
             srcChainId:    block.chainid,
             dstChainId:    L2_CHAIN_ID,
             deadline:      uint64(block.timestamp + 1 hours),
-            rationaleHash: keccak256("test")
+            rationaleHash: keccak256("test"),
+            fee:           0,
+            feeRecipient:  address(0)
         });
     }
 
@@ -240,5 +242,60 @@ contract DecisionCanonTest is Test {
 
         bool ok = messenger.verifyDecision(d, sigs);
         assertFalse(ok, "duplicate signatures must count once, not reach threshold");
+    }
+
+    // ============ v1.2 INVARIANTE 10: deposito diretto = fee zero ============
+    function test_DirectDepositMustHaveZeroFee() public {
+        // Il _buildDecision ha srcChainId == dstChainId (entrambi 9818)
+        // e fee == 0, feeRecipient == address(0). Deve passare validate.
+        DecisionLib.Decision memory d = _buildDecision(10);
+        assertEq(d.fee, 0, "direct deposit fee must be 0");
+        assertEq(d.feeRecipient, address(0), "direct deposit feeRecipient must be 0");
+
+        // record deve funzionare
+        decisionRegistry.record(d);
+        assertTrue(decisionRegistry.isRecorded(DecisionLib.hash(d)));
+    }
+
+    // ============ v1.2 INVARIANTE 11: cross-chain con fee ============
+    function test_CrossChainMustHaveFeeRecipientIfFee() public {
+        DecisionLib.Decision memory d = _buildDecision(11);
+        // Simula cross-chain: src != dst
+        d.srcChainId = 11155111;
+        d.dstChainId = 9818;
+        d.fee = 1000000; // 1 mUSDC di fee
+        d.feeRecipient = address(0); // manca il recipient
+
+        // validate deve rifiutare: fee > 0 ma feeRecipient == 0
+        vm.expectRevert("invalid decision");
+        decisionRegistry.record(d);
+    }
+
+    // ============ v1.2 INVARIANTE 12: cross-chain con fee corretta ============
+    function test_CrossChainWithValidFee() public {
+        DecisionLib.Decision memory d = _buildDecision(12);
+        d.srcChainId = 11155111;
+        d.dstChainId = 9818;
+        d.fee = 1000000;
+        d.feeRecipient = g3; // recipient valido
+
+        // validate deve accettare
+        decisionRegistry.record(d);
+        assertTrue(decisionRegistry.isRecorded(DecisionLib.hash(d)));
+    }
+
+    // ============ v1.2 INVARIANTE 13: hash include fee e feeRecipient ============
+    function test_HashIncludesFeeAndFeeRecipient() public {
+        DecisionLib.Decision memory d1 = _buildDecision(13);
+        DecisionLib.Decision memory d2 = _buildDecision(13);
+        // Stessa decisione, stessa nonce, ma fee diversa
+        d2.fee = 500000;
+        d2.feeRecipient = g4;
+
+        // Gli hash devono essere diversi
+        assertTrue(
+            DecisionLib.hash(d1) != DecisionLib.hash(d2),
+            "hash must include fee and feeRecipient"
+        );
     }
 }

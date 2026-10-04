@@ -1,6 +1,6 @@
 # CANON — Imperium Decision Canon
 
-> Versione: 1.1 (Beta, Fase A)
+> Versione: 1.2 (Beta, Fase A)
 > Ultimo aggiornamento: 2026-10-04
 > Contratto di riferimento: `contracts/decisions/DecisionLib.sol`
 
@@ -21,6 +21,9 @@ Questo documento definisce la **grammatica delle decisioni** che attraversano il
         uint256 dstChainId;
         uint64  deadline;
         bytes32 rationaleHash;
+        // --- v1.2 ---
+        uint256 fee;             // 0 se deposito diretto, >0 se cross-chain
+        address feeRecipient;    // 0x0 se fee == 0
     }
 
 **L'ordine dei campi è parte del canone.** Cambiarlo invalida ogni firma esistente. Mai cambiare l'ordine. Mai rimuovere un campo. Solo aggiungere in coda, e solo con bump di versione esplicito.
@@ -30,15 +33,17 @@ Questo documento definisce la **grammatica delle decisioni** che attraversano il
 | Campo | Tipo | Vincoli | Descrizione |
 |---|---|---|---|
 | `kind` | uint8 | uno dei `KIND_*` sotto | Tipo di decisione |
-| `actor` | address | diverso da address(0) | Chi ha originato la decisione (msg.sender on-chain) |
+| `actor` | address | diverso da address(0) | Chi ha originato la decisione |
 | `token` | address | vedi kind | Token coinvolto (address(0) se non applicabile) |
 | `recipient` | address | vedi kind | Destinatario (address(0) se non applicabile) |
-| `amount` | uint256 | vedi kind | Importo (0 se non applicabile) |
+| `amount` | uint256 | vedi kind | Importo lordo (0 se non applicabile) |
 | `nonce` | uint256 | unico per (actor, kind) | Anti-replay |
 | `srcChainId` | uint256 | diverso da 0 | Catena di origine |
 | `dstChainId` | uint256 | diverso da 0 | Catena di destinazione |
 | `deadline` | uint64 | diverso da 0 | Dopo questo timestamp, la firma è invalida |
 | `rationaleHash` | bytes32 | diverso da 0 | keccak256 di una spiegazione umana off-chain |
+| `fee` | uint256 | vedi sezione 13 | Fee trattenuta dal protocollo (0 se deposito diretto) |
+| `feeRecipient` | address | vedi sezione 13 | Destinatario della fee (0x0 se fee == 0) |
 
 ---
 
@@ -46,16 +51,10 @@ Questo documento definisce la **grammatica delle decisioni** che attraversano il
 
 | Valore | Costante | Uso | Campi obbligatori |
 |---|---|---|---|
-| 1 | `KIND_DEPOSIT` | Lock su root, release su child | token, recipient, amount |
-| 2 | `KIND_WITHDRAW` | Lock su child, release su root | token, recipient, amount |
+| 1 | `KIND_DEPOSIT` | Deposito (lock o trasferimento) | token, recipient, amount |
+| 2 | `KIND_WITHDRAW` | Prelievo | token, recipient, amount |
 | 3 | `KIND_REGISTER_TOKEN` | Registrazione token supportato | token |
 | 4 | `KIND_EMERGENCY` | Azione di emergenza | nessuno specifico |
-
-**Aggiungere un nuovo `kind` richiede:**
-1. Aggiungere la costante in `DecisionLib.sol`
-2. Aggiungere i vincoli in `DecisionLib.validate`
-3. Aggiornare questo documento
-4. Aggiungere un test in `test/decisions/`
 
 ---
 
@@ -65,7 +64,8 @@ Questo documento definisce la **grammatica delle decisioni** che attraversano il
         return keccak256(abi.encode(
             d.kind, d.actor, d.token, d.recipient,
             d.amount, d.nonce, d.srcChainId, d.dstChainId,
-            d.deadline, d.rationaleHash
+            d.deadline, d.rationaleHash,
+            d.fee, d.feeRecipient
         ));
     }
 
@@ -78,8 +78,8 @@ Questo hash è:
 
 Verifica ricorrente:
 
-    cast keccak $(cast abi-encode "f(uint8,address,address,address,uint256,uint256,uint256,uint256,uint64,bytes32)" \
-      $KIND $ACTOR $TOKEN $RECIPIENT $AMOUNT $NONCE $SRC $DST $DEADLINE $RATIONALE)
+    cast keccak $(cast abi-encode "f(uint8,address,address,address,uint256,uint256,uint256,uint256,uint64,bytes32,uint256,address)" \
+      $KIND $ACTOR $TOKEN $RECIPIENT $AMOUNT $NONCE $SRC $DST $DEADLINE $RATIONALE $FEE $FEE_RECIPIENT)
 
 deve restituire esattamente il `DID` emesso nell'evento `DecisionRecorded`.
 
@@ -87,14 +87,12 @@ deve restituire esattamente il `DID` emesso nell'evento `DecisionRecorded`.
 
 ## 4. `rationaleHash` — la spiegazione umana
 
-`rationaleHash` è l'unico campo che non ha effetto diretto on-chain. È un hash. Ma è parte del canone perché **lega ogni decisione a una spiegazione leggibile**.
+`rationaleHash` lega ogni decisione a una spiegazione leggibile.
 
-**Convenzione (v1.1):**
+**Convenzione (v1.2):**
 
-- `rationaleHash = keccak256(abi.encodePacked("deposit", actor, token, recipient, amount, nonce))` per deposit
-- `rationaleHash = keccak256(abi.encodePacked("withdraw", actor, token, recipient, amount, nonce))` per withdraw
-
-Questo è il **minimo**. In futuro, `rationaleHash` potrà puntare a un documento IPFS o a un URL versionato. La regola: chi firma **deve poter verificare** che l'hash corrisponda a una spiegazione che comprende.
+- Deposit: `keccak256(abi.encodePacked("deposit", actor, token, recipient, amount, nonce))`
+- Withdraw: `keccak256(abi.encodePacked("withdraw", actor, token, recipient, amount, nonce))`
 
 **Nessuna decisione senza `rationaleHash` diverso da zero.** Se non sai spiegare cosa stai firmando, non stai firmando.
 
@@ -102,84 +100,48 @@ Questo è il **minimo**. In futuro, `rationaleHash` potrà puntare a un document
 
 ## 5. Il ciclo di vita di una decisione
 
-    1. PROPOSAL       Il bridge costruisce una Decision e chiama messenger.recordDecision(d).
-                      → evento DecisionRecorded(id, d) nel DecisionRegistry
-                      → evento DecisionRecordedViaMessenger(id, d) nel Messenger
-
-    2. FIRMA          I guardian leggono l'evento, verificano rationaleHash,
-                      e firmano l'id canonico (ETH personal_sign di id).
-
-    3. VERIFICA       Chiunque chiama messenger.verifyDecision(d, signatures).
-                      Restituisce true se e solo se:
-                      - messenger non in pausa
-                      - DecisionLib.validate(d) == true
-                      - !DecisionLib.isExpired(d, now)
-                      - decisionRegistry.isRecorded(id) == true
-                      - decisionRegistry.isVetoed(id) == false
-                      - almeno threshold firme valide da guardian attivi distinti
-
-    4. ESECUZIONE     Il bridge chiama executeWithdrawal / finalizeDeposit.
-                      → trasferimento token
-                      → processedDecisions[id] = true (anti-replay)
-
-    5. VETO           In qualsiasi momento dopo la registrazione,
-                      VETO_ROLE può chiamare decisionRegistry.veto(id, reason).
-                      → la decisione non è più verificabile
+    1. PROPOSAL       Il bridge costruisce una Decision e chiama recordDecision(d).
+    2. FIRMA          I guardian firmano l'id canonico (ETH personal_sign di id).
+    3. VERIFICA       verifyDecision(d, sigs) controlla pausa, validità, deadline,
+                      registrazione, veto, threshold, guardian attivi.
+    4. ESECUZIONE     Il bridge trasferisce token e marca processedDecisions[id] = true.
+    5. VETO           VETO_ROLE può vetare una decisione in qualsiasi momento.
 
 ---
 
 ## 6. Veto
 
-**Chi ha `VETO_ROLE`:**
-- Fase A (attuale): il deployer
-- Fase C (futura): il Timelock del DAO, o un Safe dedicato
+**Chi ha `VETO_ROLE`:** deployer (Fase A) → Safe/DAO (Fase C).
 
-**Il veto è irreversibile.** Non esiste `unveto`. Una volta vetata, una decisione resta vetata per sempre.
-
-**Effetto del veto:**
-- `verifyDecision` restituisce `false` anche con 5/5 firme valide
-- `executeWithdrawal` / `finalizeDeposit` reverta
-- Il token resta nel bridge
-
-**Conseguenza sui firmatari:** chi ha firmato una decisione poi vetata ha firmato male. La politica di slashing (futura) prevederà una penalità proporzionale allo stake. Per ora, il veto è un segnale pubblico: il firmatario è tracciato.
+**Il veto è irreversibile.** `verifyDecision` restituisce `false` anche con 5/5 firme valide.
 
 ---
 
 ## 7. Scadenze
 
-**Regola dura: `deadline` diverso da zero.** Ogni decisione ha una scadenza. Nessuna decisione eterna.
-
-**Deadline di default:** 1 ora dalla costruzione (`DEFAULT_DEADLINE = 1 hours`).
-
-**Perché:** una decisione senza scadenza è una firma in bianco. Se il contesto cambia (prezzo, saldo, altro), la firma vecchia resta valida per sempre. Inaccettabile.
-
-**Chi decide la deadline:** il bridge, al momento della costruzione. Non l'utente. Non il guardian. Così è uniforme per kind.
-
-**Verifica:** `DecisionLib.isExpired(d, block.timestamp)`. Se `now > deadline`, la decisione è morta.
+**Regola dura: `deadline` diverso da zero.** Deadline di default: 1 ora dalla costruzione.
 
 ---
 
 ## 8. Threshold e firme
 
-**Threshold attuale:** 3 su 5 (configurato in `initialize` del messenger, modificabile via `setThreshold` dal governor).
+**Threshold:** 3 su 5 (configurabile dal governor).
 
-**Regole di conteggio:**
-- Una firma conta solo se il firmatario è `registry.isActiveGuardian(signer) == true` **al momento della verifica**
-- Firme duplicate (stesso firmatario) contano **una sola volta**
-- Firme da non-guardian sono ignorate (non invalidano il messaggio, semplicemente non contano)
-- Firme in eccesso rispetto a threshold sono accettate
-
-**Cosa significa in pratica:** un guardian rimosso dopo aver firmato non conta più. Questo è intenzionale: se un guardian viene disattivato per comportamento scorretto, le sue firme passate non valgono più come peso attuale.
+Regole:
+- Conta solo se `isActiveGuardian(signer)` al momento della verifica.
+- Firme duplicate contano una volta.
+- Firme da non-guardian sono ignorate.
+- Firme in eccesso rispetto a threshold sono accettate.
 
 ### 8.1 Come si firma — regola operativa
 
-**Il messaggio firmato è `id = DecisionLib.hash(d)`.** La firma è ECDSA standard su `id` con prefisso Ethereum (0x19 "Ethereum Signed Message:\n32").
+**Il messaggio firmato è `id = DecisionLib.hash(d)`.**
 
-**Con `cast` (riga di comando):**
+**Con `cast`:**
 
     cast wallet sign --private-key <PK> $DID
 
-`cast` applica il prefisso Ethereum automaticamente. **NON** usare `--no-hash` sull'eth-hash precalcolato. **NON** calcolare il prefisso a mano. Il comando corretto è firmare **`$DID`** direttamente.
+**NON** usare `--no-hash` sull'eth-hash precalcolato. **NON** calcolare il prefisso a mano.
 
 **Verifica:**
 
@@ -192,50 +154,43 @@ Deve restituire `Validation succeeded`.
     const id = computeDecisionHash(decision);
     const signature = await wallet.signMessage(ethers.getBytes(id));
 
-Stessa regola: firma il `$DID` come **messaggio**, non come digest. `signMessage` applica il prefisso Ethereum.
-
-**Lezione dal collaudo 2026-10-04:** le firme prodotte con `cast wallet sign --no-hash $ETH_HASH` sono state **rifiutate** dal messenger. La firma corretta è sempre `cast wallet sign $DID`.
-
 ---
 
 ## 9. Ruoli on-chain
 
 | Ruolo | Dove | Chi lo ha | Cosa può fare |
 |---|---|---|---|
-| `GOVERNOR_ROLE` | GuardianRegistry, DecisionRegistry, Messenger, BridgeRoot, BridgeChild | Deployer (Fase A) → Timelock (Fase C) | Upgrade, cambio parametri, grant/revoke ruoli |
-| `VETO_ROLE` | DecisionRegistry | Deployer (Fase A) → Safe dedicato (Fase C) | Vetare decisioni |
-| `EMERGENCY_ROLE` | Messenger, BridgeRoot, BridgeChild, GuardianRegistry | Deployer (Fase A) → Safe emergenza (Fase C) | Solo pausa e deactivateGuardian |
-| `DEFAULT_ADMIN_ROLE` | Tutti | Deployer (Fase A) → Timelock (Fase C) | Grant/revoke degli altri ruoli |
-
-**Principio:** nessun ruolo è permanente. Tutti passano dal deployer (Fase A) al DAO o a Safe dedicati (Fase C) con transazioni pubbliche.
+| `GOVERNOR_ROLE` | GuardianRegistry, DecisionRegistry, Messenger, BridgeRoot, BridgeChild | Deployer (Fase A) → Timelock (Fase C) | Upgrade, cambio parametri, grant/revoke |
+| `VETO_ROLE` | DecisionRegistry | Deployer (Fase A) → Safe (Fase C) | Vetare decisioni |
+| `EMERGENCY_ROLE` | Messenger, BridgeRoot, BridgeChild, GuardianRegistry | Deployer (Fase A) → Safe (Fase C) | Solo pausa e deactivateGuardian |
+| `DEFAULT_ADMIN_ROLE` | Tutti | Deployer (Fase A) → Timelock (Fase C) | Grant/revoke |
 
 ---
 
 ## 10. Cosa NON è nel canone
 
-Esplicitamente fuori dal canone:
-
-- **Payload `bytes` opachi.** Vietati.
-- **Decisioni senza `rationaleHash`.** Vietate.
-- **Decisioni senza `deadline`.** Vietate.
-- **Firme su hash non canonici.** Ignorate.
-- **`verifySignatures(bytes32, bytes[])`** — la vecchia API è stata rimossa.
-- **Aggirare il DecisionRegistry** per eseguire azioni del bridge. Vietato.
+- Payload `bytes` opachi. Vietati.
+- Decisioni senza `rationaleHash`. Vietate.
+- Decisioni senza `deadline`. Vietate.
+- Decisioni con `fee > amount * MAX_FEE_BPS / 10000`. Vietate (revertа).
+- Firme su hash non canonici. Ignorate.
+- Aggirare il DecisionRegistry. Vietato.
 
 ---
 
 ## 11. Versionamento
 
-**Versione corrente: 1.1.**
+**Versione corrente: 1.2.**
 
-Cambiamenti ammessi **senza bump di versione:**
-- Aggiunta di nuovi `kind` (con aggiornamento di `validate` e di questo documento)
-- Aggiunta di commenti in `DecisionLib.sol`
+Cambiamenti ammessi **senza bump:**
+- Nuovi `kind` (con aggiornamento di `validate`)
+- Commenti in `DecisionLib.sol`
 
-Cambiamenti che **richiedono bump di versione:**
+Cambiamenti che **richiedono bump:**
 - Aggiunta di un campo alla struct (in coda)
 - Cambio di un vincolo in `validate`
 - Cambio del formato di `rationaleHash`
+- Cambio del valore di `MAX_FEE_BPS`
 
 Cambiamenti **vietati:**
 - Rimuovere un campo
@@ -252,11 +207,54 @@ Cambiamenti **vietati:**
 - `contracts/bridge/ImperiumBridgeRoot.sol` — bridge lato L1
 - `contracts/bridge/ImperiumBridgeChild.sol` — bridge lato L2
 - `contracts/governance/GuardianRegistry.sol` — stake e ruoli guardian
-- `test/decisions/DecisionCanon.t.sol` — invarianti verificati
+- `test/decisions/DecisionCanon.t.sol` — 13 invarianti verificati
 - `docs/COLLAUDO-2026-10-04.md` — collaudo end-to-end su anvil
+- `docs/ROADMAP-v1.2.md` — piano fee e gas
 
 ---
 
-**Fine del canone v1.1.**
+## 13. Fee e gas
 
-Chi legge questo documento e il codice `DecisionLib.sol` deve poter capire, senza altre fonti, cosa è una decisione, come si firma, come si verifica, e cosa la può fermare.
+### Modello economico
+
+| Scenario | Fee protocollo | Gas |
+|---|---|---|
+| Deposito diretto su Imperium Chain | **0** | IMP |
+| Deposito via CEX → Imperium | **0** | IMP |
+| Cross-chain (da ETH, TRX, BSC...) | **>0** (configurabile) | Entrambe |
+| Fast/normal/slow | UX wallet | IMP |
+
+### Regole hard-coded (immutabili)
+
+- **`MAX_FEE_BPS = 100` (1%)** — tetto massimo alla fee, non superabile
+  nemmeno dal governor.
+- La fee è calcolata sul **lordo**: `fee = amount * feeBps / 10000`.
+  L'utente manda `amount`, il bridge trattiene `fee`, l'utente riceve
+  `amount - fee`.
+- `DecisionLib.validate` verifica `fee <= amount * MAX_FEE_BPS / 10000`.
+
+### Regola per kind
+
+- Se `srcChainId == dstChainId` (deposito diretto):
+  - `fee == 0`
+  - `feeRecipient == address(0)`
+- Se `srcChainId != dstChainId` (cross-chain):
+  - se `fee > 0` → `feeRecipient != address(0)`
+  - se `fee == 0` → `feeRecipient == address(0)`
+  - `fee <= amount * MAX_FEE_BPS / 10000`
+
+### Gas in IMP
+
+Il gas si paga in IMP sulla chain Imperium. **Fuori dal canone:** gestito
+dal wallet/client, non dal protocollo.
+
+### Fast/normal/slow
+
+Scelta di UX del wallet, **non del protocollo**. Il contratto non decide
+quanto gas pagare. L'utente sceglie via wallet.
+
+---
+
+**Fine del canone v1.2.**
+
+Chi legge questo documento e il codice `DecisionLib.sol` deve poter capire, senza altre fonti, cosa è una decisione, come si firma, come si verifica, come si calcola la fee, e cosa la può fermare.
