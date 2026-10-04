@@ -40,4 +40,6 @@ Thumbs.db
 # === IDE ===
 .vscode/
 .idea/
-broadcast/
+
+# Standard JSON inputs per explorer verification (artefatti locali)
+*-standard-json.json

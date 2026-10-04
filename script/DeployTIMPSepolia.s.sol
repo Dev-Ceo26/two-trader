@@ -13,7 +13,7 @@ contract DeployTIMPSepolia is Script {
 
         address timp = Upgrades.deployUUPSProxy(
             "tIMP.sol:tIMP",
-            abi.encodeCall(tIMP.initialize, (deployer, deployer))
+            abi.encodeCall(tIMP.initialize, (deployer, deployer, deployer))
         );
         console.log("tIMP (Sepolia):", timp);
 

@@ -18,7 +18,7 @@ contract DeployTestnet is Script {
         // 1. tIMP
         address timp = Upgrades.deployUUPSProxy(
             "tIMP.sol:tIMP",
-            abi.encodeCall(tIMP.initialize, (deployer, deployer))
+            abi.encodeCall(tIMP.initialize, (deployer, deployer, deployer))
         );
         console.log("tIMP:", timp);
 
