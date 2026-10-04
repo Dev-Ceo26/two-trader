@@ -77,7 +77,7 @@ contract DecisionCanonTest is Test {
         ImperiumBridgeRoot rootImpl = new ImperiumBridgeRoot();
         bytes memory rootInit = abi.encodeWithSelector(
             ImperiumBridgeRoot.initialize.selector,
-            address(messenger), L2_CHAIN_ID, deployer
+            address(messenger), L2_CHAIN_ID, deployer, uint256(10), deployer
         );
         bridgeRoot = ImperiumBridgeRoot(address(new ERC1967Proxy(address(rootImpl), rootInit)));
 
