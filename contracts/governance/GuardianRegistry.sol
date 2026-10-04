@@ -5,7 +5,8 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract GuardianRegistry is AccessControlUpgradeable, UUPSUpgradeable {
-    bytes32 public constant GOVERNOR_ROLE = keccak256("GOVERNOR_ROLE");
+    bytes32 public constant GOVERNOR_ROLE  = keccak256("GOVERNOR_ROLE");
+    bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
 
     struct Guardian {
         address addr;
@@ -43,6 +44,7 @@ contract GuardianRegistry is AccessControlUpgradeable, UUPSUpgradeable {
 
         _grantRole(DEFAULT_ADMIN_ROLE, governor);
         _grantRole(GOVERNOR_ROLE, governor);
+        _grantRole(EMERGENCY_ROLE, governor);
 
         minStake = _minStake;
         unstakeCooldown = _unstakeCooldown;
@@ -86,7 +88,7 @@ contract GuardianRegistry is AccessControlUpgradeable, UUPSUpgradeable {
     }
 
     function deactivateGuardian(address guardian)
-        external onlyRole(GOVERNOR_ROLE)
+        external onlyRole(EMERGENCY_ROLE)
     {
         require(guardians[guardian].active, "not active");
         guardians[guardian].active = false;

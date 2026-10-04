@@ -1,21 +1,43 @@
-# Compiler files
-cache/
-out/
-
-# Commonly ignored directories
-.logs/
-.ignore/
-
-# Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
-
-# Docs
-docs/
-
-# Dotenv file
+# === Secrets — MAI committare ===
 .env
 .env.*
-!.env.example
-.env
+*.env
+*.key
+*.pem
+*private*
+secrets/
+*.secret
+
+# === Build artifacts ===
+out/
+cache/
+broadcast/
+artifacts/
+typechain-types/
+
+# === Node ===
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# === Foundry ===
+forge-cache/
+foundry.lock
+
+# === Legacy / backup ===
+*.bak
+*.bak.*
+*.old
+*.orig
+*.swp
+
+# === OS ===
+.DS_Store
+Thumbs.db
+*.log
+
+# === IDE ===
+.vscode/
+.idea/
+broadcast/

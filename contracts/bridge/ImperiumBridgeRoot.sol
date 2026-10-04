@@ -7,7 +7,12 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ImperiumMessenger} from "./ImperiumMessenger.sol";
+import {DecisionLib} from "../decisions/DecisionLib.sol";
 
+/// @title ImperiumBridgeRoot
+/// @notice Lato root (L1) del bridge Imperium.
+///         Ogni operazione che attraversa il bridge produce una Decision
+///         canonica. Deposit = lock + record. Withdrawal = verify + release.
 contract ImperiumBridgeRoot is
     ReentrancyGuardTransient,
     UUPSUpgradeable,
@@ -15,21 +20,37 @@ contract ImperiumBridgeRoot is
 {
     using SafeERC20 for IERC20;
 
-    bytes32 public constant GOVERNOR_ROLE = keccak256("GOVERNOR_ROLE");
+    bytes32 public constant GOVERNOR_ROLE  = keccak256("GOVERNOR_ROLE");
+    bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
 
     ImperiumMessenger public messenger;
     uint256 public l2ChainId;
     uint256 public thisChainId;
 
-    mapping(address => bool) public supportedTokens;
+    mapping(address => bool)    public supportedTokens;
     mapping(address => uint256) public maxAmountPerTx;
-    mapping(bytes32 => bool) public processedMessages;
+    mapping(bytes32 => bool)    public processedDecisions;
 
     uint256 public depositNonce;
-    bool public paused;
+    bool    public paused;
 
-    event DepositInitiated(address indexed sender, address indexed recipient, address indexed token, uint256 amount, uint256 nonce);
-    event WithdrawalFinalized(bytes32 indexed messageHash, address indexed token, address indexed recipient, uint256 amount);
+    /// @notice Deadline di default per ogni decisione (1 ora).
+    uint64 public constant DEFAULT_DEADLINE = 1 hours;
+
+    event DepositInitiated(
+        address indexed sender,
+        address indexed recipient,
+        address indexed token,
+        uint256 amount,
+        uint256 nonce,
+        bytes32 decisionId
+    );
+    event WithdrawalFinalized(
+        bytes32 indexed decisionId,
+        address indexed token,
+        address indexed recipient,
+        uint256 amount
+    );
     event TokenRegistered(address indexed token, uint256 maxAmount);
     event Paused(bool state);
 
@@ -50,6 +71,7 @@ contract ImperiumBridgeRoot is
 
         _grantRole(DEFAULT_ADMIN_ROLE, governor);
         _grantRole(GOVERNOR_ROLE, governor);
+        _grantRole(EMERGENCY_ROLE, governor);
 
         messenger = ImperiumMessenger(_messenger);
         l2ChainId = _l2ChainId;
@@ -58,9 +80,16 @@ contract ImperiumBridgeRoot is
 
     function _authorizeUpgrade(address) internal override onlyRole(GOVERNOR_ROLE) {}
 
-    function setPaused(bool state) external onlyRole(GOVERNOR_ROLE) {
-        paused = state;
-        emit Paused(state);
+    /// @notice Pausa di emergenza. Solo EMERGENCY_ROLE.
+    function emergencyPause() external onlyRole(EMERGENCY_ROLE) {
+        paused = true;
+        emit Paused(true);
+    }
+
+    /// @notice Ripristino. Solo GOVERNOR_ROLE.
+    function unpause() external onlyRole(GOVERNOR_ROLE) {
+        paused = false;
+        emit Paused(false);
     }
 
     function registerToken(address token, uint256 maxAmount) external onlyRole(GOVERNOR_ROLE) {
@@ -70,7 +99,9 @@ contract ImperiumBridgeRoot is
         emit TokenRegistered(token, maxAmount);
     }
 
-    // ✅ LOCK: utente manda token al bridge
+    /// @notice LOCK: l'utente manda token al bridge e la decisione viene registrata.
+    /// @dev    La decisione NON viene eseguita qui. L'esecuzione avverra' sul child
+    ///         quando i guardian avranno firmato e la verifica passera'.
     function deposit(address token, address recipient, uint256 amount) external nonReentrant {
         require(!paused, "paused");
         require(recipient != address(0), "recipient zero");
@@ -81,29 +112,45 @@ contract ImperiumBridgeRoot is
 
         uint256 nonce = ++depositNonce;
 
-        emit DepositInitiated(msg.sender, recipient, token, amount, nonce);
+        DecisionLib.Decision memory d = DecisionLib.Decision({
+            kind:          DecisionLib.KIND_DEPOSIT,
+            actor:         msg.sender,
+            token:         token,
+            recipient:     recipient,
+            amount:        amount,
+            nonce:         nonce,
+            srcChainId:    thisChainId,
+            dstChainId:    l2ChainId,
+            deadline:      uint64(block.timestamp) + DEFAULT_DEADLINE,
+            rationaleHash: keccak256(abi.encodePacked("deposit", msg.sender, token, recipient, amount, nonce))
+        });
+
+        bytes32 id = messenger.recordDecision(d);
+
+        emit DepositInitiated(msg.sender, recipient, token, amount, nonce, id);
     }
 
-    // ✅ RELEASE: bridge manda token all'utente
+    /// @notice RELEASE: il bridge manda token all'utente.
+    /// @dev    Richiede una Decision canonica firmata da threshold guardian.
+    ///         La decisione deve essere stata registrata (recordDecision) e non vetata.
     function executeWithdrawal(
-        address token,
-        address recipient,
-        uint256 amount,
-        uint256 nonce,
+        DecisionLib.Decision calldata d,
         bytes[] calldata signatures
     ) external nonReentrant {
         require(!paused, "paused");
-        require(recipient != address(0), "recipient zero");
-        require(amount > 0, "amount zero");
+        require(d.kind == DecisionLib.KIND_WITHDRAW, "wrong kind");
+        require(d.dstChainId == thisChainId, "wrong dst chain");
+        require(d.recipient != address(0), "recipient zero");
+        require(d.amount > 0, "amount zero");
 
-        bytes32 messageHash = keccak256(abi.encode(token, recipient, amount, nonce, l2ChainId, thisChainId));
-        require(!processedMessages[messageHash], "already processed");
-        require(messenger.verifySignatures(messageHash, signatures), "invalid signatures");
+        bytes32 id = DecisionLib.hash(d);
+        require(!processedDecisions[id], "already processed");
+        require(messenger.verifyDecision(d, signatures), "invalid decision");
 
-        processedMessages[messageHash] = true;
+        processedDecisions[id] = true;
 
-        IERC20(token).safeTransfer(recipient, amount);
+        IERC20(d.token).safeTransfer(d.recipient, d.amount);
 
-        emit WithdrawalFinalized(messageHash, token, recipient, amount);
+        emit WithdrawalFinalized(id, d.token, d.recipient, d.amount);
     }
 }
