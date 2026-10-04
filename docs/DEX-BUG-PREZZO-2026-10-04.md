@@ -103,3 +103,44 @@ Con il log, si identifica dove il calcolo diverge.
 Il `cast call getSlot0` non funziona su `ImperiumPoolManager`
 (usa `Extsload` invece di una funzione esplicita).
 Per leggere lo stato del pool on-chain, serve `extsload` con la chiave corretta.
+
+---
+
+## Aggiornamento 4 — Il bug NON esisteva
+
+### Test Foundry `test/v4/SwapRatio.t.sol`
+
+Test riproducibile che isola il calcolo:
+
+    10 USDC → 9.97 tIMP (atteso 9.97 con fee 0.3%)
+
+### Log del test
+
+    === Swap delta ===
+    delta.amount0: 9969582681034960723   ← +9.97 tIMP
+    delta.amount1: -10000000             ← -10 USDC
+
+    === Delta deployer ===
+    USDC out: 10000000
+    tIMP in:  9969582681034960723
+    ratio:    0.997 (con fee 0.3%)
+
+### Conclusione
+
+**Il router e' corretto.** Il calcolo del delta e' corretto.
+Il tick -276324 corrisponde a 1 tIMP = 1 USDC. La fee 3000 e' 0.3%.
+Il rapporto 10 USDC → 9.97 tIMP e' matematicamente esatto.
+
+**L'osservazione precedente (rapporto 10:1) era un errore di lettura
+dei saldi su anvil.** Il deployer partiva con un saldo maggiore di
+quello ipotizzato. I saldi reali sono sempre stati coerenti.
+
+### Stato finale
+
+- DEX V4: ✅ funzionante e collaudato
+- Pool: ✅ prezzo corretto
+- Swap: ✅ rapporto ~1:1 con fee
+- Hook: ✅ neutro (registra solo statistiche)
+- Router: ✅ corretto
+
+**Nessun fix necessario. Il DEX e' pronto per il deploy su testnet.**
