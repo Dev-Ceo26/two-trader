@@ -251,3 +251,61 @@ text
 **Risultato:** `execution reverted: already processed`
 
 Il campo `processedDecisions[decisionId]` impedisce la doppia esecuzione.
+
+### Veto — Verde
+
+Nuovo deposit (nonce 3, DID `0x951b03a8...`), firme 3/3, `verifyDecision = true`.
+
+Poi veto dal deployer (VETO_ROLE):
+cast send 
+D
+R
+E
+G
+"
+v
+e
+t
+o
+(
+b
+y
+t
+e
+s
+32
+,
+s
+t
+r
+i
+n
+g
+)
+"
+DREG"veto(bytes32,string)"DID2 "test veto su testnet"
+
+text
+
+- `isVetoed(did)` → `true`
+- `verifyDecision(did, sigs)` → `false`
+
+**Il veto blocca la decisione anche con 3/3 firme valide.**
+
+---
+
+## Riepilogo collaudo canone v1.2 su testnet
+
+| Test | Risultato |
+|---|---|
+| Deposit cross-chain | ✅ |
+| DID calcolato == DID on-chain | ✅ |
+| Firme 3/3 | ✅ |
+| verifyDecision (baseline) | ✅ true |
+| finalizeDeposit | ✅ |
+| Saldi coerenti | ✅ |
+| Replay | ✅ revert |
+| Veto | ✅ false |
+| Fee trasferita | ✅ |
+
+**Il canone v1.2 e' operativo sulla testnet pubblica.**
