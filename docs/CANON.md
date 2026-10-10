@@ -199,6 +199,29 @@ Cambiamenti **vietati:**
 
 ---
 
+## 11.1 Prevalenza del VOIDS.md
+
+L'interpretazione dei vuoti del canone segue `docs/VOIDS.md`.
+Una modifica che non e' conforme al `VOIDS.md` non e' un'estensione
+legittima: e' una **riscrittura**, e richiede un bump di versione
+maggiore del canone.
+
+In caso di conflitto interpretativo tra `CANON.md` e `VOIDS.md`,
+prevale il `VOIDS.md` (P4 — Prevalenza).
+
+La procedura di emendamento del `VOIDS.md` e' definita nel `VOIDS.md`
+stesso (P5 — Falsificabilita', Clausola di Emendamento).
+
+I vuoti mappati nel `VOIDS.md` sono:
+- `kind` — il Sovrano
+- `actor` — il Soggetto Giuridico
+- `amount` — la Misura
+- `rationaleHash` — il Testimone
+- `fee` + `feeRecipient` — i Custodi del valore
+- `deadline` — l'Orizzonte
+
+---
+
 ## 12. Riferimenti
 
 - `contracts/decisions/DecisionLib.sol` — definizione canonica
