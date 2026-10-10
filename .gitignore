@@ -45,3 +45,5 @@ Thumbs.db
 *-standard-json.json
 .env.anvil
 .env.imperium.source
+_legacy/
+.env.testnet
