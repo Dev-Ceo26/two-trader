@@ -281,11 +281,24 @@ terzi nel mondo reale, la proposta decade come rumore.
 - Se l'osservatore conferma -> l'emendamento entra in vigore.
 - Se l'osservatore non conferma -> l'emendamento e' vetato.
 
-**Nota per il futuro:** N = 2 e' calibrato per una community piccola
-(beta). Prima del lancio pubblico, N deve essere rivisto (proposta
-minima: 5 osservatori indipendenti). N=2 e' troppo basso per un
-sistema maturo, perche' un singolo osservatore puo' emendare qualsiasi
-cosa.
+**Nota per il futuro — TODO pre-lancio:**
+
+N = 2 e' calibrato per la beta. Troppo basso per un sistema maturo:
+un singolo osservatore puo' emendare qualsiasi cosa.
+
+**Prima del lancio pubblico:**
+1. Alzare N a **3 + 3** (struttura esatta da definire: se sono
+   3 proponenti + 3 osservatori, o 3 osservatori con doppia
+   conferma, e' ancora da decidere).
+2. **Riscrivere l'intera Clausola di Emendamento**. La procedura
+   attuale (proposta -> osservatore -> provvisorio -> definitivo)
+   e' calibrata per N piccolo. Con N grande serve una procedura
+   diversa, con fasi di raccolta osservazioni, finestre temporali,
+   e criteri di decadenza piu' espliciti.
+
+Entrambe le cose vanno fatte **prima** che il canone passi da
+"legge ordinaria" a "costituzione" nel senso pieno. Finche' siamo
+in beta, N=2 basta.
 
 ### Procedura
 
