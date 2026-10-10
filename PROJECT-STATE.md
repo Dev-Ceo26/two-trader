@@ -251,3 +251,18 @@ Con `pending < scale`, `pending/scale = 0` e lo slot non cambiava mai.
 - pending=5  → slot=6s
 - pending=10 → slot=4s
 - pending=20 → slot=2s (clamp min)
+
+### Fix formula (divisione intera)
+
+La prima versione aveva un bug: `raw = base / (1 + pending / scale)`.
+Con `pending < scale`, `pending/scale = 0` e lo slot non cambiava mai.
+
+**Formula corretta:**
+    raw = base * scale / (scale + pending)
+
+**Verifica on-chain:**
+- pending=0  → slot=12s
+- pending=3  → slot=7s   ✅
+- pending=5  → slot=6s
+- pending=10 → slot=4s
+- pending=20 → slot=2s (clamp min)
