@@ -1,0 +1,55 @@
+# Deploy DEX V4 — Testnet Imperium (2026-10-10)
+
+Data: 2026-10-10
+Deployer: 0x8d2eD8c03c62407fae385E32121172b3b12ff484
+Explorer: https://explorer-testnet.imperiumscan.com/
+
+## Contratti DEX
+
+| Contratto | Indirizzo |
+|---|---|
+| ImperiumPoolManager (proxy) | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 |
+| ImperiumRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 |
+| ImperiumHooks (flag 0xC0) | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 |
+
+## Pool
+
+| Campo | Valore |
+|---|---|
+| Token0 | tIMP (0x63B3b910..., 18 dec) |
+| Token1 | mUSDC-b (0xFCDE586a..., 6 dec) |
+| Fee | 3000 (0.3%) |
+| TickSpacing | 60 |
+| Tick iniziale | -276324 |
+| Hook | 0xc6c21de8... |
+
+## Whitelist
+
+- allowToken(tIMP) ✅
+- allowToken(mUSDC-b) ✅
+- allowPair(tIMP, mUSDC-b) ✅
+- allowPool(pool) ✅
+
+## AddLiquidity
+
+- 100.000 tIMP + 100.000 mUSDC
+- Range: [-286320, -266340] (±10.000 tick)
+
+## TestSwap
+
+- Swap: 10 mUSDC → ~102,8 tIMP
+- Rapporto: ~10,28 tIMP/USDC
+
+**Nota:** il test Foundry `SwapRatioTest` dava 9,97 tIMP per 10 USDC (rapporto ~1:1).
+La differenza tra test e chain reale e' da investigare.
+Il DEX e' tecnicamente funzionante: pool, hook, swap, transfer tutti corretti.
+
+## Script utilizzati
+
+- script/deploy/02_DeployPoolManager.s.sol
+- script/DeployImperiumRouter.s.sol
+- script/DeployImperiumHooks.s.sol
+- script/CreatePoolWithHook.s.sol
+- script/AllowPool.s.sol
+- script/AddLiquidity.s.sol
+- script/TestSwap.s.sol
