@@ -6,6 +6,7 @@ import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Currency} from "v4-core/types/Currency.sol";
+import {TickMath} from "v4-core/libraries/TickMath.sol";
 
 contract CreatePoolWithHook is Script {
     function run() external {
@@ -20,10 +21,22 @@ contract CreatePoolWithHook is Script {
         console2.log("Token0:", token0);
         console2.log("Token1:", token1);
 
-        // Prezzo corretto: 1 USDC = 1 tIMP
-        // amount1/amount0 = 1e18/1e6 = 1e12
-        // sqrtPriceX96 = 2^96 * sqrt(1e12) = 2^96 * 1e6
-        uint160 sqrtPriceX96 = 79228162514264337593543950336000000; // 2^96 * 1e6
+        // Il prezzo dipende dall'ordine dei token nel PoolKey.
+        // Per 1 tIMP = 1 USDC in valore:
+        //   - se token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
+        //     price = 1e6/1e18 = 1e-12, tick ~ -276324
+        //   - se token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
+        //     price = 1e18/1e6 = 1e12, tick ~ 276324
+        int24 initialTick;
+        if (uint160(timp) < uint160(mockUsdc)) {
+            initialTick = -276324;
+        } else {
+            initialTick = 276324;
+        }
+
+        uint160 sqrtPriceX96 = TickMath.getSqrtPriceAtTick(initialTick);
+        console2.log("Initial tick:", initialTick);
+        console2.log("sqrtPriceX96:", uint256(sqrtPriceX96));
 
         vm.startBroadcast();
 

@@ -6,6 +6,7 @@ import {ImperiumRouter} from "../contracts/v4/ImperiumRouter.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Currency} from "v4-core/types/Currency.sol";
+import {TickMath} from "v4-core/libraries/TickMath.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockUSDC} from "../src/MockUSDC.sol";
 
@@ -35,26 +36,40 @@ contract AddLiquidity is Script {
         IERC20(mockUsdc).approve(router, type(uint256).max);
         console2.log("Approved router");
 
-        // Range intorno al tick corrente del pool (276324).
+        // Range intorno al tick corrente del pool.
         // tickSpacing = 60, quindi tickLower/tickUpper devono essere
         // multipli di 60.
-        int24 tickLower = 276240;
-        int24 tickUpper = 276420;
+        int24 tickLower;
+        int24 tickUpper;
+        int24 currentTick;
+        if (uint160(timp) < uint160(mockUsdc)) {
+            // token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
+            // 1 tIMP = 1 USDC in valore -> tick ~ -276324
+            currentTick = -276324;
+            // Range ampio: ±10000 tick (circa 2.7x in valore)
+            tickLower = -286320;  // -276324 - 9996
+            tickUpper = -266340;  // -276324 + 9984
+        } else {
+            // token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
+            // 1 USDC = 1 tIMP in valore -> tick ~ 276324
+            currentTick = 276324;
+            tickLower = 266340;
+            tickUpper = 286320;
+        }
 
-        // sqrtPriceX96 del pool: 2^96 * 1e6 (impostato in CreatePoolWithHook)
-        uint160 sqrtPriceX96 = 79228162514264337593543950336000000;
+        uint160 sqrtPriceX96 = TickMath.getSqrtPriceAtTick(currentTick);
         // amount0/amount1 dipendono dall'ordine dei token nel PoolKey.
         // Il PoolKey ordina per indirizzo, non per decimali.
         uint256 amount0;
         uint256 amount1;
         if (uint160(timp) < uint160(mockUsdc)) {
             // token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
-            amount0 = 1_000 * 10 ** 18;
-            amount1 = 1_000 * 10 ** 6;
+            amount0 = 100_000 * 10 ** 18;
+            amount1 = 100_000 * 10 ** 6;
         } else {
             // token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
-            amount0 = 1_000 * 10 ** 6;
-            amount1 = 1_000 * 10 ** 18;
+            amount0 = 100_000 * 10 ** 6;
+            amount1 = 100_000 * 10 ** 18;
         }
 
         console2.log("Adding liquidity (range -60/+60)...");
