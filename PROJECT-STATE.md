@@ -124,3 +124,23 @@ Il canone delle decisioni e' l'implementazione di questa visione."
 
 Nomi candidati per la chain definitiva: Aegis, Custos, Portalis, Aeternum,
 Sentinel, Vigil, Canon.
+
+### Decisione: PromoteGovernance rimandato
+
+**Il deployer mantiene GOVERNOR_ROLE + DEFAULT_ADMIN_ROLE su tutti i contratti**
+(canone v1.2, DEX, DAO) durante la beta.
+
+Motivo: permettere fix rapidi se qualcosa si rompe durante l'uso dei betatester.
+Il DAO e' deployato ma in "shadow" (nessun ruolo sui contratti di sistema).
+
+**PromoteGovernance sara' eseguito come ultimo passo prima del lancio pubblico**, quando:
+1. I betatester hanno usato la beta per un periodo sufficiente
+2. Tutti i bug conosciuti sono fixati
+3. Un ultimo collaudo end-to-end e' verde
+4. Si decide che il codice e' stabile
+
+Sequenza finale:
+1. `script/GrantGovernance.s.sol` — concede GOVERNOR_ROLE + DEFAULT_ADMIN_ROLE al Timelock
+2. Verifica on-chain dei RoleGranted
+3. `script/RevokeDeployer.s.sol` — il deployer rinuncia
+4. Test di governance reale (proposta → voto → esecuzione)
