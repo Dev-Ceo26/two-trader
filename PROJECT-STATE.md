@@ -144,3 +144,59 @@ Sequenza finale:
 2. Verifica on-chain dei RoleGranted
 3. `script/RevokeDeployer.s.sol` — il deployer rinuncia
 4. Test di governance reale (proposta → voto → esecuzione)
+
+---
+
+## Riepilogo finale beta (2026-10-10)
+
+### Tutto deployato e funzionante
+
+| Componente | Indirizzo |
+|---|---|
+| tIMP | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B |
+| mUSDC-b | 0xFCDE586a3f72d535902E8197AE3effeb4a3E9171 |
+| GuardianRegistry | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 |
+| DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e |
+| ImperiumMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
+| ImperiumBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
+| ImperiumBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
+| ImperiumPoolManager | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 |
+| ImperiumRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 |
+| ImperiumHooks | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 |
+| TimelockController | 0xf621898a59cd792cb0bef8ba46226ef3cddcb922 |
+| ImperiumDAO | 0x757ac427055fad1ddb235bb84248ef489b9a7f6d |
+
+### Test verdi (end-to-end su testnet)
+- DepositCrossChain
+- Firme 3/3
+- verifyDecision
+- finalizeDeposit
+- Replay -> revert 'already processed'
+- Veto
+- Swap DEX
+- Proposta DAO (stato Pending)
+
+### Deployer
+- 0x8d2eD8c03c62407fae385E32121172b3b12ff484
+- GOVERNOR_ROLE su tutti i contratti (beta)
+- VETO_ROLE su DecisionRegistry
+
+### Guardian registrati
+- G1 = deployer
+- G2 = 0x10872E0e2eCC9883CDCbecD74C8e6eb856c31C72
+- G3 = 0x1E48B5f4a711288fD7456Fbfa94C6F76E4bC9d87
+- Chiavi private in _legacy/guardian-wallets-beta.txt (gitignored)
+
+### Documentazione
+- PROJECT-STATE.md (questo file)
+- docs/CANON.md
+- docs/COLLAUDO-TESTNET-V1.2.md
+- docs/DEPLOYED-BETA-V1.2.md
+- docs/DEPLOYED-DEX-TESTNET.md
+- docs/BETA-GUIDE.md
+- docs/ROADMAP-v1.2.md
+
+### Prossimo
+1. Consegna ai betatester
+2. Monitoraggio 24/7 per fix rapidi
+3. PromoteGovernance solo al pre-lancio
