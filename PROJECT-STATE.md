@@ -200,3 +200,39 @@ Sequenza finale:
 1. Consegna ai betatester
 2. Monitoraggio 24/7 per fix rapidi
 3. PromoteGovernance solo al pre-lancio
+
+---
+
+## Slot adattivo (2026-10-10)
+
+### Modifica a qpos-consensus
+
+Il consenso ora calcola lo slot dinamicamente in base al mempool:
+
+    slot = clamp(base_slot / (1 + pending_tx / tx_scale), min_slot, max_slot)
+
+**Parametri:**
+- base_slot: 12s
+- min_slot: 2s
+- max_slot: 30s
+- tx_scale: 5
+
+**Comportamento:**
+| pending | slot | blocchi/giorno |
+|---|---|---|
+| 0 | 12s | 7.200 |
+| 5 | 6s | 14.400 |
+| 20 | 2s | 43.200 |
+| 50+ | 2s | 43.200 |
+
+### File modificati
+- `src/config.rs` — nuovi campi (`base_slot`, `min_slot`, `max_slot`, `tx_scale`, `dynamic_slot`)
+- `src/reth_rpc.rs` — `txpool_pending_count()`
+- `src/main.rs` — calcolo dinamico + sleep
+
+### Riavvio
+Il processo gira in screen: `screen -ls | grep qpos`.
+
+### Verifica
+- idle: slot 12s, 2-3 blocchi/30s
+- 20 tx in 5s: slot 2s
