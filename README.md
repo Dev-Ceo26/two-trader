@@ -1,66 +1,75 @@
-## Foundry
+# Imperium
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+> **Stato attuale beta**: vedi [PROJECT-STATE.md](./PROJECT-STATE.md)
+>
+> Chain: **Imperium Testnet** (chainId 9818)
+> Explorer: https://explorer-testnet.imperiumscan.com/
+> Ultimo aggiornamento: 2026-10-10
 
-Foundry consists of:
+---
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Cos'e' Imperium
 
-## Documentation
+Chain EVM con un **canone delle decisioni** sopra il bridge.
+Ogni decisione che muove valore e' un oggetto canonico (`DecisionLib.Decision`)
+con campi nominati, firme 3/5, deadline, veto, fee.
+Niente payload opachi. Niente "firma qualunque cosa".
 
-https://book.getfoundry.sh/
+### Obiettivi
 
-## Usage
+- **Infrastruttura per trading e trasferimenti** senza opacita'
+- **Rescue nativo dei fondi** (deadline, veto, emergency)
+- **Anti-scam by design** (whitelist, canone, governance)
+- **Decisioni canoniche** tracciate, leggibili, verificabili
 
-### Build
+---
+
+## Struttura
+contracts/
+├── decisions/ # DecisionLib, DecisionRegistry (canone)
+├── bridge/ # Messenger, BridgeRoot, BridgeChild
+├── governance/ # GuardianRegistry, ImperiumDAO, Timelock
+├── v4/ # PoolManager, Router, Hooks (DEX)
+├── token/ # tIMP
+└── ...
+
+docs/
+├── CANON.md # La grammatica delle decisioni
+├── BETA-GUIDE.md # Guida per i betatester
+├── PROJECT-STATE.md # Stato attuale (in root)
+└── ...
+
+text
+
+---
+
+## Documentazione chiave
+
+| Documento | Cosa contiene |
+|---|---|
+| [PROJECT-STATE.md](./PROJECT-STATE.md) | Stato attuale del progetto |
+| [docs/CANON.md](./docs/CANON.md) | La grammatica delle decisioni |
+| [docs/BETA-GUIDE.md](./docs/BETA-GUIDE.md) | Guida per i betatester |
+| [docs/COLLAUDO-TESTNET-V1.2.md](./docs/COLLAUDO-TESTNET-V1.2.md) | Collaudo end-to-end |
+| [docs/DEPLOYED-BETA-V1.2.md](./docs/DEPLOYED-BETA-V1.2.md) | Indirizzi canone |
+| [docs/DEPLOYED-DEX-TESTNET.md](./docs/DEPLOYED-DEX-TESTNET.md) | Indirizzi DEX |
+
+---
+
+## Build e test
+
+Richiede [Foundry](https://book.getfoundry.sh/).
 
 ```shell
-$ forge build
-```
+forge build
+forge test
+Deploy
+Vedi docs/BETA-GUIDE.md per il deploy sulla testnet.
 
-### Test
+Contatti
+GitHub: Dev-Ceo26/quantum-imperium
 
-```shell
-$ forge test
-```
+Explorer: https://explorer-testnet.imperiumscan.com/
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+License
+MIT (vedi LICENSE)
