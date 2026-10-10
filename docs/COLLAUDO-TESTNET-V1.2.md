@@ -192,3 +192,62 @@ dal child. Delta netto = 0 (ha depositato 100, ha ricevuto 100).
 Il passaggio da anvil a testnet **non ha richiesto modifiche al codice**.
 L'unico problema è stato il chainId duplicato (9818 per entrambi),
 risolto cambiando anvil a 31337.
+
+---
+
+## Test edge case
+
+### Replay — Verde
+
+Tentativo di rieseguire la Decision gia' processata (`0xf61497b1...`):
+
+cast send 
+B
+C
+H
+I
+L
+D
+"
+f
+i
+n
+a
+l
+i
+z
+e
+D
+e
+p
+o
+s
+i
+t
+(
+.
+.
+.
+)
+"
+"
+(
+.
+.
+.
+)
+"
+"
+[
+BCHILD"finalizeDeposit(...)""(...)""[OS1,
+O
+S
+2
+,
+OS2,OS3]"
+
+text
+
+**Risultato:** `execution reverted: already processed`
+
+Il campo `processedDecisions[decisionId]` impedisce la doppia esecuzione.
