@@ -1,0 +1,126 @@
+# PROJECT STATE — Imperium (beta)
+
+> Ultimo aggiornamento: 2026-10-10
+> Chain ID: 9818 (beta, pubblica)
+> Nome: Imperium (BETA — il nome definitivo sara' scelto prima del lancio)
+> Chain ID definitivo: da decidere (9819 candidato)
+
+---
+
+## Cos'e' il progetto
+
+Chain EVM con un **canone delle decisioni** sopra il bridge.
+Ogni decisione che muove valore e' un oggetto canonico (`DecisionLib.Decision`)
+con campi nominati, firme 3/5, deadline, veto, fee.
+Niente payload opachi. Niente "firma qualunque cosa".
+Obiettivo: infrastruttura per trading e trasferimenti senza opacita',
+con rescue nativo dei fondi e anti-scam by design.
+
+---
+
+## Stack tecnico
+
+| Componente | Dove | Note |
+|---|---|---|
+| **reth** | Raspberry (`/mnt/reth-archive/9818`) | Nodo EVM, systemd: `reth-testnet.service` |
+| **qpos-consensus** | Raspberry (processo separato) | Consenso QPoS, 4 validatori, slot 6s |
+| **Blockscout** | VPS (`/opt/blockscout/docker-compose`) | Explorer, blockscout:quantum-imperium-v2 |
+| **Foundry** | Raspberry (`~/.foundry/bin`) | forge, cast, anvil |
+| **Repo** | Raspberry (`~/timp-token`) | git, branch `master` |
+
+### Accessi
+
+- RPC testnet: `http://localhost:30334` (Raspberry) / raggiungibile dal VPS
+- Explorer: `https://explorer-testnet.imperiumscan.com/`
+- Deployer: `0x8d2eD8c03c62407fae385E32121172b3b12ff484` (~999.999 IMP)
+- VPS: `root@imperium` (Blockscout)
+- Chiave deployer: in `.env.imperium` (NON committata)
+
+---
+
+## Contratti deployati sulla beta (19, settembre 2026)
+
+Allineati con Sepolia. Vedi `DEPLOYED.md` per la lista completa.
+Includono: tIMP, Vault, FeeDistributor, Factory, Staking, Faucet,
+GuardianRegistry (v1), Messenger (v1), BridgeRoot/Child (v1),
+PoolManager, Router, Hooks (v1), IMPUSD, MasterMinter, MockUSDC/USDT, BRVBTC.
+
+**NOTA:** questi sono contratti della **versione precedente** del canone.
+Non hanno `DecisionLib`, non hanno `EMERGENCY_ROLE`, non hanno fee configurabile.
+
+---
+
+## Contratti da deployare (canone v1.2)
+
+Da deployare **sopra** la beta attuale, come sistema separato:
+
+| Contratto | Stato | Indirizzo |
+|---|---|---|---|
+| GuardianRegistry v1.2 | deployato 2026-10-10 | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 |
+| DecisionRegistry | deployato 2026-10-10 | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e |
+| ImperiumMessenger v1.2 | deployato 2026-10-10 | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
+| ImperiumBridgeRoot v1.2 | deployato 2026-10-10 | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
+| ImperiumBridgeChild v1.2 | deployato 2026-10-10 | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
+| ImperiumPoolManager | da deployare | — |
+| ImperiumRouter v1.2 | da deployare | — |
+| ImperiumHooks v1.2 (fix tick) | da deployare | — |
+| TimelockController | da deployare | — |
+| ImperiumDAO v1.2 | da deployare | — |
+
+---
+
+## Cosa funziona (verificato)
+
+- ✅ Canone v1.2 (13/13 test Foundry verdi)
+- ✅ Cross-chain con fee (collaudato su anvil, Sessioni A/B/C)
+- ✅ PromoteGovernance (grant + renounce, collaudato su anvil)
+- ✅ DEX V4 (pool, hook, swap — collaudato su anvil con fix tick)
+- ✅ Chain testnet attiva (blocco 193.594)
+- ✅ Explorer Blockscout funzionante (backend healthy, log limitati)
+- ✅ Disco VPS: 16% (128 GB liberi)
+- ✅ Disco Raspberry: /mnt/reth-archive 22% (349 GB liberi)
+
+## Cosa manca
+
+- ✅ Canone v1.2 deployato sulla beta (2026-10-10)
+- ✅ 3 guardian attivi (deployer + G2 + G3), stake 1000 IMP ciascuno
+- ❌ DEX fixato NON deployato sulla beta
+- ❌ DAO reale (TimelockController) NON deployato
+- ❌ PromoteGovernance NON eseguito sulla beta
+- ❌ Test end-to-end sulla beta (deposit/firme/finalize/swap)
+- ✅ `.env.testnet` creato
+- ✅ Anvil a chainId 31337 (testnet resta 9818)
+- ✅ Broadcast separati (31337 vs 9818)
+- ⚠️ `qi-blocks`/`qi-attestations` crescono ~2 GB/giorno
+- ⚠️ Zero peer (chain privata, non pubblica ancora)
+- ⚠️ Firewall assente (RPC esposto su 0.0.0.0:30334)
+
+---
+
+## Prossimo passo
+
+1. Cambiare anvil a chainId 31337
+2. Creare `.env.testnet`
+3. Deployare canone v1.2 + DEX + DAO sulla beta
+4. Test end-to-end
+5. Promuovere governance al DAO
+6. Consegna ai betatester
+
+---
+
+## Come riprendere il contesto
+
+Se stai iniziando una nuova chat, incolla questo file e chiedi:
+"Riprendiamo da PROJECT-STATE.md. Cosa facciamo adesso?"
+
+---
+
+## Visione (per il nome definitivo)
+
+"Prima chain decentralizzata senza mano umana, dove si fa trading senza paura
+dei short, senza dump del 30% in pochi giorni, con token rescue nativo,
+revert delle tx non confermate in 24h, anti-scam by design.
+Il canone delle decisioni e' l'implementazione di questa visione."
+
+Nomi candidati per la chain definitiva: Aegis, Custos, Portalis, Aeternum,
+Sentinel, Vigil, Canon.
