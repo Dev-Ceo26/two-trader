@@ -1,9 +1,11 @@
-# PROJECT STATE — Imperium (beta)
+# PROJECT STATE — Twotrader (beta)
 
-> Ultimo aggiornamento: 2026-10-10
-> Chain ID: 9818 (beta, pubblica)
-> Nome: Imperium (BETA — il nome definitivo sara' scelto prima del lancio)
-> Chain ID definitivo: da decidere (9819 candidato)
+> Ultimo aggiornamento: 2026-10-15
+> Nome: **Twotrader** (TDR)
+> Dominio: two-trader.com | Explorer: two-trader.io
+> Chain ID testnet: 9818
+> Chain ID mainnet: 9819
+> Brand registrato su Ethereum mainnet (vedi docs/BRAND-REGISTRATION.md)
 
 ---
 
@@ -122,8 +124,7 @@ dei short, senza dump del 30% in pochi giorni, con token rescue nativo,
 revert delle tx non confermate in 24h, anti-scam by design.
 Il canone delle decisioni e' l'implementazione di questa visione."
 
-Nomi candidati per la chain definitiva: Aegis, Custos, Portalis, Aeternum,
-Sentinel, Vigil, Canon.
+Nome definitivo: **Twotrader** (TDR).
 
 ### Decisione: PromoteGovernance rimandato
 

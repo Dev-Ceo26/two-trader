@@ -20,7 +20,7 @@
 
 Il documento di riferimento e' il manifesto Twotrader:
 
-- **File:** `docs/TWOTRADER-MANIFESTO.md` (da creare)
+- **File:** `docs/TWOTRADER-MANIFESTO.md`
 - **Hash (Keccak-256 del PDF):** 0x7cc6ecb5a28676582f88a25506d5b68bcd0d72310065c23c4c5f419247c0a095
 - **Come verificare:** scarica il PDF, calcola `cast keccak $(xxd -p manifesto.pdf | tr -d '\n')` e confronta con l'hash sopra
 
