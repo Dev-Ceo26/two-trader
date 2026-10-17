@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/logo.png" alt="Two-Trader Logo" width="350">
+  <img src="./assets/logo.png" alt="Two-Trader Logo" width="250">
 </p>
 
 <h1 align="center">Quantum Imperium — The Ethereum Backup Plan</h1>
