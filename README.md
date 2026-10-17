@@ -1,75 +1,30 @@
-# Imperium
+# T2T — TWO-TRADER
 
-> **Stato attuale beta**: vedi [PROJECT-STATE.md](./PROJECT-STATE.md)
->
-> Chain: **Imperium Testnet** (chainId 9818)
-> Explorer: https://explorer-testnet.imperiumscan.com/
-> Ultimo aggiornamento: 2026-10-10
+![T2T Banner](docs/assets/banner.png)
 
----
+**MORE THAN A PLATFORM. A TRADING ECOSYSTEM.**
 
-## Cos'e' Imperium
+Twotrader (T2T) è una chain EVM decentralizzata costruita per il trading.
+Niente payload opachi, niente "firma qualunque cosa". Ogni decisione che muove valore è un oggetto canonico con firme 3/5, deadline e veto.
 
-Chain EVM con un **canone delle decisioni** sopra il bridge.
-Ogni decisione che muove valore e' un oggetto canonico (`DecisionLib.Decision`)
-con campi nominati, firme 3/5, deadline, veto, fee.
-Niente payload opachi. Niente "firma qualunque cosa".
+## I 3 Pilastri
 
-### Obiettivi
+- 📈 **REAL MARKETS**: Trading reale, senza paura dei dump improvvisi o dei short manipolati.
+- 🛠 **SMART TOOLS**: Il Canone delle Decisioni. Sicurezza e anti-scam by design.
+- 🌍 **GLOBAL COMMUNITY**: Una rete governata dalla community, senza mano umana.
 
-- **Infrastruttura per trading e trasferimenti** senza opacita'
-- **Rescue nativo dei fondi** (deadline, veto, emergency)
-- **Anti-scam by design** (whitelist, canone, governance)
-- **Decisioni canoniche** tracciate, leggibili, verificabili
+## Ecosistema
 
----
+- **Chain ID Testnet:** 9818
+- **Chain ID Mainnet:** 9819 (In arrivo)
+- **Explorer:** [explorer-testnet.imperiumscan.com](https://explorer-testnet.imperiumscan.com/)
+- **Sito Web:** [two-trader.com](https://two-trader.com)
 
-## Struttura
-contracts/
-├── decisions/ # DecisionLib, DecisionRegistry (canone)
-├── bridge/ # Messenger, BridgeRoot, BridgeChild
-├── governance/ # GuardianRegistry, ImperiumDAO, Timelock
-├── v4/ # PoolManager, Router, Hooks (DEX)
-├── token/ # tIMP
-└── ...
+## Documentazione
 
-docs/
-├── CANON.md # La grammatica delle decisioni
-├── BETA-GUIDE.md # Guida per i betatester
-├── PROJECT-STATE.md # Stato attuale (in root)
-└── ...
-
-text
+- [Stato del Progetto (PROJECT-STATE.md)](PROJECT-STATE.md)
+- [Il Canone delle Decisioni (docs/CANON.md)](docs/CANON.md)
+- [Guida per i Betatester (docs/BETA-GUIDE.md)](docs/BETA-GUIDE.md)
 
 ---
-
-## Documentazione chiave
-
-| Documento | Cosa contiene |
-|---|---|
-| [PROJECT-STATE.md](./PROJECT-STATE.md) | Stato attuale del progetto |
-| [docs/CANON.md](./docs/CANON.md) | La grammatica delle decisioni |
-| [docs/BETA-GUIDE.md](./docs/BETA-GUIDE.md) | Guida per i betatester |
-| [docs/COLLAUDO-TESTNET-V1.2.md](./docs/COLLAUDO-TESTNET-V1.2.md) | Collaudo end-to-end |
-| [docs/DEPLOYED-BETA-V1.2.md](./docs/DEPLOYED-BETA-V1.2.md) | Indirizzi canone |
-| [docs/DEPLOYED-DEX-TESTNET.md](./docs/DEPLOYED-DEX-TESTNET.md) | Indirizzi DEX |
-
----
-
-## Build e test
-
-Richiede [Foundry](https://book.getfoundry.sh/).
-
-```shell
-forge build
-forge test
-Deploy
-Vedi docs/BETA-GUIDE.md per il deploy sulla testnet.
-
-Contatti
-GitHub: Dev-Ceo26/quantum-imperium
-
-Explorer: https://explorer-testnet.imperiumscan.com/
-
-License
-MIT (vedi LICENSE)
+*TRADE • ANALYZE • GROW*

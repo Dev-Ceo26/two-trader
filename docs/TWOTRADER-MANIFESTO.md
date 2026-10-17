@@ -1,7 +1,7 @@
 # Twotrader Manifesto
 
 **Nome:** Twotrader
-**Ticker:** TDR
+**Ticker:** T2T
 **Dominio:** two-trader.com
 **Data:** 2026-10-15
 **Autore:** Dev-Ceo26 (github.com/Dev-Ceo26)

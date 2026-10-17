@@ -21,7 +21,7 @@ Niente payload opachi. Niente "firma qualunque cosa".
 ## Setup wallet
 
 1. Aggiungi la rete al wallet:
-   - Nome: IMPERIUM Testnet
+   - Nome: TWOTRADER Testnet
    - RPC: [vedi docs/RPC.md]
    - Chain ID: 9818
    - Symbol: IMP
