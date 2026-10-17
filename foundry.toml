@@ -30,4 +30,4 @@ exclude_lints = [
 
 [rpc_endpoints]
 twotrader_mainnet = "https://rpc.two-trader.com"
-twotrader_testnet = "https://rpc-testnet.two-trader.com"
+twotrader_testnet = "http://localhost:30334"
