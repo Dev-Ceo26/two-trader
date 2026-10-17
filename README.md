@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Two Trader--Safe-By%20Default-0A84FF?style=for-the-badge" alt="Two Trader">
   <img src="https://img.shields.io/badge/Layer--1-Blockchain-FFD700?style=for-the-badge" alt="Layer 1">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
-  <a href="https://ftwo-trader.com" target="_blank" rel="noopener noreferrer">
+  <a href="https://two-trader.com" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/Faucet-tIMP-7B68EE?style=for-the-badge" alt="Faucet">
   </a>
 </p>
