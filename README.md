@@ -2,7 +2,7 @@
   <img src="./assets/logo.png" alt="Two-Trader Logo" width="250">
 </p>
 
-<h1 align="center">Two Trader Dex</h1>
+<h1 align="center">T2T Dex</h1>
 
 <p align="center">
   <strong>A quantum-safe, modular Layer-1 blockchain designed to complement Ethereum.</strong>
