@@ -17,7 +17,7 @@ Niente payload opachi, niente "firma qualunque cosa". Ogni decisione che muove v
 
 - **Chain ID Testnet:** 9818
 - **Chain ID Mainnet:** 9819 (In arrivo)
-- **Explorer:** [explorer-testnet.imperiumscan.com](https://explorer-testnet.imperiumscan.com/)
+- **Explorer:** [explorer-testnet.twotrader-scan.com](https://explorer-testnet.twotrader-scan.com/)
 - **Sito Web:** [two-trader.com](https://two-trader.com)
 
 ## Documentazione

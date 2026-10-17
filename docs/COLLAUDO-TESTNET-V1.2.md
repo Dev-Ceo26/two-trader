@@ -1,6 +1,6 @@
-# Collaudo canone v1.2 — Testnet Imperium (2026-10-10)
+# Collaudo canone v1.2 — Testnet Twotrader (2026-10-10)
 
-Primo collaudo end-to-end del canone v1.2 sulla **testnet pubblica** Imperium
+Primo collaudo end-to-end del canone v1.2 sulla **testnet pubblica** Twotrader
 (chainId 9818). Non su anvil, su chain reale.
 
 ---
@@ -13,9 +13,9 @@ Primo collaudo end-to-end del canone v1.2 sulla **testnet pubblica** Imperium
 |---|---|
 | GuardianRegistry | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 |
 | DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e |
-| ImperiumMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
-| ImperiumBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
-| ImperiumBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
+| TwotraderMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
+| TwotraderBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
+| TwotraderBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
 | MockToken (mUSDC-b, 6 dec) | 0xFCDE586a3f72d535902E8197AE3effeb4a3E9171 |
 
 ### Guardian registrati (3/3)
@@ -127,7 +127,7 @@ text
 - amount: 100000000 (100 mUSDC lordo)
 - nonce: 1
 - srcChainId: 11155111 (Sepolia)
-- dstChainId: 9818 (Imperium)
+- dstChainId: 9818 (Twotrader)
 - deadline: 1791647734
 - rationaleHash: 0x07a9b763...
 - fee: 100000 (0.1 mUSDC)

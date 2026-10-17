@@ -59,8 +59,8 @@ Contratto	Indirizzo
 MockUSDC	0x610178dA211FEF7D417bC0e6FeD39F05609AD788
 tIMP (proxy)	0x0B306BF915C4d645ff596e518fAf3F9669b97016
 PoolManager (proxy)	0x4A679253410272dd5232B3Ff7cF5dbB88f295319
-ImperiumRouter	0x7a2088a1bFc9d81c55368AE168C2C02570cB814F
-ImperiumHooks	0xF30458e23336f15931bC1658b5c7C6Ec5b3a40c0
+TwotraderRouter	0x7a2088a1bFc9d81c55368AE168C2C02570cB814F
+TwotraderHooks	0xF30458e23336f15931bC1658b5c7C6Ec5b3a40c0
 Pool: tIMP/MockUSDC, fee 3000, tickSpacing 60, hook 0xF30458...
 
 ---
@@ -69,7 +69,7 @@ Pool: tIMP/MockUSDC, fee 3000, tickSpacing 60, hook 0xF30458...
 
 ### Cosa è corretto
 
-- `ImperiumPoolManager` e' un PoolManager V4 completo (usa Pool.State, SafeCast, CustomRevert)
+- `TwotraderPoolManager` e' un PoolManager V4 completo (usa Pool.State, SafeCast, CustomRevert)
 - L'hook `beforeSwap` ritorna `BeforeSwapDeltaLibrary.ZERO_DELTA` (neutro)
 - Tick del pool: -276324 (corretto)
 - Prezzo: 1e-12 (corretto, 1 tIMP = 1 USDC)
@@ -100,7 +100,7 @@ Con il log, si identifica dove il calcolo diverge.
 
 ### Nota
 
-Il `cast call getSlot0` non funziona su `ImperiumPoolManager`
+Il `cast call getSlot0` non funziona su `TwotraderPoolManager`
 (usa `Extsload` invece di una funzione esplicita).
 Per leggere lo stato del pool on-chain, serve `extsload` con la chiave corretta.
 

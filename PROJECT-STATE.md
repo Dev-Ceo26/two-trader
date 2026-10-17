@@ -26,17 +26,17 @@ con rescue nativo dei fondi e anti-scam by design.
 |---|---|---|
 | **reth** | Raspberry (`/mnt/reth-archive/9818`) | Nodo EVM, systemd: `reth-testnet.service` |
 | **qpos-consensus** | Raspberry (processo separato) | Consenso QPoS, 4 validatori, slot adattivo |
-| **Blockscout** | VPS (`/opt/blockscout/docker-compose`) | Explorer, blockscout:quantum-imperium-v2 |
+| **Blockscout** | VPS (`/opt/blockscout/docker-compose`) | Explorer, blockscout:quantum-twotrader-v2 |
 | **Foundry** | Raspberry (`~/.foundry/bin`) | forge, cast, anvil |
 | **Repo** | Raspberry (`~/twotrader`) | git, branch `master` |
 
 ### Accessi
 
 - RPC testnet: `http://localhost:30334` (Raspberry) / raggiungibile dal VPS (tramite whitelist)
-- Explorer: `https://explorer-testnet.imperiumscan.com/`
+- Explorer: `https://explorer-testnet.twotrader-scan.com/`
 - Deployer: `0x8d2eD8c03c62407fae385E32121172b3b12ff484` (~999.999 IMP)
-- VPS: `root@imperium` (Blockscout)
-- Chiave deployer: in `.env.imperium` (NON committata)
+- VPS: `root@twotrader` (Blockscout)
+- Chiave deployer: in `.env.twotrader` (NON committata)
 
 ---
 
@@ -49,14 +49,14 @@ Tutti i contratti del canone v1.2, DEX e DAO sono deployati e testati.
 | tIMP | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B | ✅ |
 | GuardianRegistry v1.2 | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 | ✅ |
 | DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e | ✅ |
-| ImperiumMessenger v1.2 | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 | ✅ |
-| ImperiumBridgeRoot v1.2 | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c | ✅ |
-| ImperiumBridgeChild v1.2 | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 | ✅ |
-| ImperiumPoolManager | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 | ✅ (Fixato) |
-| ImperiumRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 | ✅ |
-| ImperiumHooks (fix tick) | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 | ✅ (Fixato) |
+| TwotraderMessenger v1.2 | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 | ✅ |
+| TwotraderBridgeRoot v1.2 | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c | ✅ |
+| TwotraderBridgeChild v1.2 | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 | ✅ |
+| TwotraderPoolManager | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 | ✅ (Fixato) |
+| TwotraderRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 | ✅ |
+| TwotraderHooks (fix tick) | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 | ✅ (Fixato) |
 | TimelockController | 0xf621898a59cd792cb0bef8ba46226ef3cddcb922 | ✅ |
-| ImperiumDAO | 0x757ac427055fad1ddb235bb84248ef489b9a7f6d | ✅ |
+| TwotraderDAO | 0x757ac427055fad1ddb235bb84248ef489b9a7f6d | ✅ |
 
 ### Test superati (End-to-End su testnet)
 - DepositCrossChain, Firme 3/3, verifyDecision, finalizeDeposit, Replay revert, Veto, Swap DEX, Proposta DAO.

@@ -1,10 +1,10 @@
-# Deploy — Imperium Chain
+# Deploy — Twotrader Chain
 
 ## Prerequisiti
 
 | Contratto | Deve essere deployato | Note |
 |---|---|---|
-| `ImperiumPoolManager` (UUPS) | Si | Singleton V4 |
+| `TwotraderPoolManager` (UUPS) | Si | Singleton V4 |
 | `GuardianRegistry` (UUPS) | Si | Set di firma per il bridge |
 | `OWNER` (multisig DAO) | Si | Governor on-chain |
 
@@ -23,7 +23,7 @@ Lette dagli script, presenti in `.env` o esportate nella shell:
 |---|---|
 | `DEPLOYER` | Indirizzo pubblico del deployer |
 | `RPC_URL` | Endpoint RPC della chain di destinazione |
-| `POOL_MANAGER` | Indirizzo del proxy ImperiumPoolManager |
+| `POOL_MANAGER` | Indirizzo del proxy TwotraderPoolManager |
 | `GUARDIAN_REGISTRY` | Indirizzo del proxy GuardianRegistry |
 | `OWNER` | Indirizzo del multisig DAO |
 
@@ -39,7 +39,7 @@ o `--trezor`. Mai via file di configurazione committabile.
       --private-key $PK \
       --broadcast
 
-### Deploy su testnet Imperium
+### Deploy su testnet Twotrader
 
     forge script script/DeployTestnet.s.sol \
       --rpc-url $RPC_URL \

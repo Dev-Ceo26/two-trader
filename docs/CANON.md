@@ -1,10 +1,10 @@
-# CANON — Imperium Decision Canon
+# CANON — Twotrader Decision Canon
 
 > Versione: 1.2 (Beta, Fase A)
 > Ultimo aggiornamento: 2026-10-04
 > Contratto di riferimento: `contracts/decisions/DecisionLib.sol`
 
-Questo documento definisce la **grammatica delle decisioni** che attraversano il bridge Imperium. Ogni decisione che ha effetto on-chain deve essere esprimibile come `DecisionLib.Decision`. Nessuna decisione opaca. Nessun `bytes32` sciolto. Nessuna firma su qualcosa che non sia nel canone.
+Questo documento definisce la **grammatica delle decisioni** che attraversano il bridge Twotrader. Ogni decisione che ha effetto on-chain deve essere esprimibile come `DecisionLib.Decision`. Nessuna decisione opaca. Nessun `bytes32` sciolto. Nessuna firma su qualcosa che non sia nel canone.
 
 ---
 
@@ -226,9 +226,9 @@ I vuoti mappati nel `VOIDS.md` sono:
 
 - `contracts/decisions/DecisionLib.sol` — definizione canonica
 - `contracts/decisions/DecisionRegistry.sol` — registro e veto
-- `contracts/bridge/ImperiumMessenger.sol` — verifica firme
-- `contracts/bridge/ImperiumBridgeRoot.sol` — bridge lato L1
-- `contracts/bridge/ImperiumBridgeChild.sol` — bridge lato L2
+- `contracts/bridge/TwotraderMessenger.sol` — verifica firme
+- `contracts/bridge/TwotraderBridgeRoot.sol` — bridge lato L1
+- `contracts/bridge/TwotraderBridgeChild.sol` — bridge lato L2
 - `contracts/governance/GuardianRegistry.sol` — stake e ruoli guardian
 - `test/decisions/DecisionCanon.t.sol` — 13 invarianti verificati
 - `docs/COLLAUDO-2026-10-04.md` — collaudo end-to-end su anvil
@@ -242,8 +242,8 @@ I vuoti mappati nel `VOIDS.md` sono:
 
 | Scenario | Fee protocollo | Gas |
 |---|---|---|
-| Deposito diretto su Imperium Chain | **0** | IMP |
-| Deposito via CEX → Imperium | **0** | IMP |
+| Deposito diretto su Twotrader Chain | **0** | IMP |
+| Deposito via CEX → Twotrader | **0** | IMP |
 | Cross-chain (da ETH, TRX, BSC...) | **>0** (configurabile) | Entrambe |
 | Fast/normal/slow | UX wallet | IMP |
 
@@ -268,7 +268,7 @@ I vuoti mappati nel `VOIDS.md` sono:
 
 ### Gas in IMP
 
-Il gas si paga in IMP sulla chain Imperium. **Fuori dal canone:** gestito
+Il gas si paga in IMP sulla chain Twotrader. **Fuori dal canone:** gestito
 dal wallet/client, non dal protocollo.
 
 ### Fast/normal/slow

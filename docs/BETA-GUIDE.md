@@ -1,15 +1,15 @@
-# Beta Test Guide — Imperium Testnet
+# Beta Test Guide — Twotrader Testnet
 
 > Versione beta: 0.1 (2026-10-10)
 > Chain ID: 9818
-> Explorer: https://explorer-testnet.imperiumscan.com/
+> Explorer: https://explorer-testnet.twotrader-scan.com/
 
-Benvenuto nella beta di Imperium. Questa guida ti spiega cosa testare,
+Benvenuto nella beta di Twotrader. Questa guida ti spiega cosa testare,
 come farlo, e come segnalare problemi.
 
 ---
 
-## Cos'e' Imperium
+## Cos'e' Twotrader
 
 Chain EVM con un **canone delle decisioni** sopra il bridge.
 Ogni decisione che muove valore e' un oggetto canonico (`DecisionLib.Decision`)
@@ -38,16 +38,16 @@ Niente payload opachi. Niente "firma qualunque cosa".
 |---|---|
 | GuardianRegistry | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 |
 | DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e |
-| ImperiumMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
-| ImperiumBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
-| ImperiumBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
+| TwotraderMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
+| TwotraderBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
+| TwotraderBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
 
 ### DEX
 | Contratto | Indirizzo |
 |---|---|
-| ImperiumPoolManager | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 |
-| ImperiumRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 |
-| ImperiumHooks | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 |
+| TwotraderPoolManager | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 |
+| TwotraderRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 |
+| TwotraderHooks | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 |
 
 ### Token
 | Token | Indirizzo |
@@ -58,7 +58,7 @@ Niente payload opachi. Niente "firma qualunque cosa".
 ### Governance
 | Contratto | Indirizzo |
 |---|---|
-| ImperiumDAO | 0x757ac427055fad1ddb235bb84248ef489b9a7f6d |
+| TwotraderDAO | 0x757ac427055fad1ddb235bb84248ef489b9a7f6d |
 | Timelock | 0xf621898a59cd792cb0bef8ba46226ef3cddcb922 |
 
 ---
@@ -172,5 +172,5 @@ Apri una issue su GitHub con:
 
 ## Contatti
 
-- GitHub: Dev-Ceo26/quantum-imperium
-- Explorer: https://explorer-testnet.imperiumscan.com/
+- GitHub: Dev-Ceo26/quantum-twotrader
+- Explorer: https://explorer-testnet.twotrader-scan.com/

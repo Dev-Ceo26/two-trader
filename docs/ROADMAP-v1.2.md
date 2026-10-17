@@ -4,8 +4,8 @@
 
 | Scenario | Fee protocollo | Gas |
 |---|---|---|
-| Deposito diretto su Imperium Chain | **0** | IMP |
-| Deposito via CEX → Imperium | **0** | IMP |
+| Deposito diretto su Twotrader Chain | **0** | IMP |
+| Deposito via CEX → Twotrader | **0** | IMP |
 | Cross-chain (da ETH, TRX, BSC...) | **>0** (configurabile) | Entrambe |
 | Fast/normal/slow | UX wallet | IMP |
 
@@ -71,7 +71,7 @@ Aggiungi a `test/decisions/DecisionCanon.t.sol`:
 
 ## Sessione B — Bridge e deploy (1,5 ore)
 
-### B.1 — `ImperiumBridgeRoot`
+### B.1 — `TwotraderBridgeRoot`
 
 Aggiungi:
 
@@ -103,7 +103,7 @@ Aggiungi `depositCrossChain` (se serve in questa sessione):
         }
     }
 
-### B.2 — `ImperiumBridgeChild.finalizeDeposit`
+### B.2 — `TwotraderBridgeChild.finalizeDeposit`
 
 Modifica per gestire `fee`:
 

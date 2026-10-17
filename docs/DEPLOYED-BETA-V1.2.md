@@ -1,8 +1,8 @@
-# Deploy canone v1.2 — Testnet Imperium (chainId 9818)
+# Deploy canone v1.2 — Testnet Twotrader (chainId 9818)
 
 Data: 2026-10-10
 Deployer: 0x8d2eD8c03c62407fae385E32121172b3b12ff484
-Explorer: https://explorer-testnet.imperiumscan.com/
+Explorer: https://explorer-testnet.twotrader-scan.com/
 
 ## Contratti del canone v1.2
 
@@ -10,9 +10,9 @@ Explorer: https://explorer-testnet.imperiumscan.com/
 |---|---|
 | GuardianRegistry | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 |
 | DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e |
-| ImperiumMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
-| ImperiumBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
-| ImperiumBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
+| TwotraderMessenger | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 |
+| TwotraderBridgeRoot | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c |
+| TwotraderBridgeChild | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 |
 
 ## Configurazione
 

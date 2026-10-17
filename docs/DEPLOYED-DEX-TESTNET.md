@@ -1,16 +1,16 @@
-# Deploy DEX V4 — Testnet Imperium (2026-10-10)
+# Deploy DEX V4 — Testnet Twotrader (2026-10-10)
 
 Data: 2026-10-10
 Deployer: 0x8d2eD8c03c62407fae385E32121172b3b12ff484
-Explorer: https://explorer-testnet.imperiumscan.com/
+Explorer: https://explorer-testnet.twotrader-scan.com/
 
 ## Contratti DEX
 
 | Contratto | Indirizzo |
 |---|---|
-| ImperiumPoolManager (proxy) | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 |
-| ImperiumRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 |
-| ImperiumHooks (flag 0xC0) | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 |
+| TwotraderPoolManager (proxy) | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 |
+| TwotraderRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 |
+| TwotraderHooks (flag 0xC0) | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 |
 
 ## Pool
 
@@ -47,8 +47,8 @@ Il DEX e' tecnicamente funzionante: pool, hook, swap, transfer tutti corretti.
 ## Script utilizzati
 
 - script/deploy/02_DeployPoolManager.s.sol
-- script/DeployImperiumRouter.s.sol
-- script/DeployImperiumHooks.s.sol
+- script/DeployTwotraderRouter.s.sol
+- script/DeployTwotraderHooks.s.sol
 - script/CreatePoolWithHook.s.sol
 - script/AllowPool.s.sol
 - script/AddLiquidity.s.sol

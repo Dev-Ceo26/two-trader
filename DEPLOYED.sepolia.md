@@ -1,4 +1,4 @@
-# Imperium — Sepolia Testnet (Chain ID 11155111)
+# Twotrader — Sepolia Testnet (Chain ID 11155111)
 **Data:** 2026-09-20
 **RPC:** https://ethereum-sepolia-rpc.publicnode.com
 
@@ -18,7 +18,7 @@
 | 10 | Messenger | 0xa0f33b1cfda7a34ef25bf29644c2e73cc5f82d9d |
 | 11 | BridgeChild | 0x83d10a689994430ebb1c4a8c01fb09b82e5ada90 |
 | 12 | TimelockController | 0xdeb453fd9c3dbe87abd1e0a2f6c238be9f470aea |
-| 13 | ImperiumDAO | 0x42f898c665ece6820935c23d3b1f74f7e8b6da06 |
+| 13 | TwotraderDAO | 0x42f898c665ece6820935c23d3b1f74f7e8b6da06 |
 | 14 | MockUSDC | 0x747ae7f491eb7daa7c096ba0d2bd85fe2a56ab62 |
 | 15 | MockUSDT | 0x81a456c4604d318684d8100dc4df7ef2afa40953 |
 | 16 | MasterMinter | 0x1af35bc76661abb9ffc2ee7f1decb10ca69766f7 |
