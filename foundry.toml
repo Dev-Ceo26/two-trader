@@ -29,5 +29,5 @@ exclude_lints = [
 ]
 
 [rpc_endpoints]
-imperium_mainnet = "https://rpc.imperiumscan.com"
-imperium_testnet = "https://rpc-testnet.imperiumscan.com"
+twotrader_mainnet = "https://rpc.two-trader.com"
+twotrader_testnet = "https://rpc-testnet.two-trader.com"

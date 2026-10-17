@@ -13,7 +13,7 @@ contract DeployBRVBTC is Script {
         vm.startBroadcast();
 
         BolivarRepublicaVenezuelaBTC brvbtc = new BolivarRepublicaVenezuelaBTC(
-            "https://imperiumscan.com/metadata/brvbtc.json",
+            "https://two-trader.com/metadata/brvbtc.json",
             mockUsdc,
             poolManager
         );
