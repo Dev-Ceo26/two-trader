@@ -428,3 +428,7 @@ Target sperimentali, non garanzie.
 5. Implementazione Fase 2 (SLE v1)
 
 ---
+
+---
+
+*Documento vivo. Ogni modifica richiede aggiornamento della sezione ADR.*
