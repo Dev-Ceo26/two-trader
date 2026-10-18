@@ -18,7 +18,7 @@ Niente payload opachi. Niente "firma qualunque cosa".
 Obiettivo: infrastruttura per trading e trasferimenti senza opacità,
 con rescue nativo dei fondi e anti-scam by design.
 
-Sopra la chain vive **T2T DEX**, il modulo di trading nativo (Uniswap v4 fork):
+Sopra la chain vive **T2T DEX**, il modulo di trading nativo basato su **SLE** (Smart Liquidity Engine):
 pool concentrate, hooks con guardian check, router e pool manager.
 **MORE THAN A PLATFORM. A TRADING ECOSYSTEM.**
 
