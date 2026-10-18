@@ -26,13 +26,10 @@ import {Exttload} from "v4-core/Exttload.sol";
 import {CustomRevert} from "v4-core/libraries/CustomRevert.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-//  ██╗███╗   ███╗██████╗ ███████╗██████╗ ██╗██╗   ██╗███╗   ███╗
-//  ██║████╗ ████║██╔══██╗██╔════╝██╔══██╗██║██║   ██║████╗ ████║
-//  ██║██╔████╔██║██████╔╝█████╗  ██████╔╝██║██║   ██║██╔████╔██║
-//  ██║██║╚██╔╝██║██╔═══╝ ██╔══╝  ██╔══██╗██║██║   ██║██║╚██╔╝██║
-//  ██║██║ ╚═╝ ██║██║     ███████╗██║  ██║██║╚██████╔╝██║ ╚═╝ ██║
-//  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
-//                    QUANTUM T2T CHAIN
+// ============================================================
+//  T2T POOL MANAGER — Two-Trader (T2T)
+//  UUPS upgradable
+// ============================================================
 
 /// @title T2TPoolManager
 /// @notice Holds the state for all pools. UUPS upgradable.
@@ -53,7 +50,7 @@ contract T2TPoolManager is
     using CurrencyReserves for Currency;
     using CustomRevert for bytes4;
 
-    string public constant LOGO_URI = "https://T2Tscan.com/assets/logo.png";
+    string public constant LOGO_URI = "https://two-trader.com/logo.svg";
 
     int24 private constant MAX_TICK_SPACING = TickMath.MAX_TICK_SPACING;
     int24 private constant MIN_TICK_SPACING = TickMath.MIN_TICK_SPACING;
