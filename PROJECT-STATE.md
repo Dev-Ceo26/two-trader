@@ -1,22 +1,26 @@
-# PROJECT STATE — Twotrader (T2T)
+# PROJECT STATE — Two-Trader (T2T)
 
-> Ultimo aggiornamento: 2026-10-17
-> Nome: **Twotrader** (T2T)
-> Dominio: two-trader.com | Explorer: two-trader.io
-> Chain ID testnet: 9818
-> Chain ID mainnet: 9819 (Standby)
+> Ultimo aggiornamento: 2026-10-18
+> Nome: **Two-Trader** (T2T)
+> Dominio: two-trader.com | Explorer: explorer-testnet.two-trader.io
+> Chain ID Testnet: **332**
+> Chain ID Mainnet: **333** (Standby, non avviata)
 > Brand registrato su Ethereum mainnet (vedi docs/BRAND-REGISTRATION.md)
 
 ---
 
 ## Che cos'e' il progetto
 
-Chain EVM con un **canone delle decisioni** sopra il bridge.
+Two-Trader (T2T) è una chain EVM con un **canone delle decisioni** sopra il bridge.
 Ogni decisione che muove valore e' un oggetto canonico (`DecisionLib.Decision`)
 con campi nominati, firme 3/5, deadline, veto, fee.
 Niente payload opachi. Niente "firma qualunque cosa".
-Obiettivo: infrastruttura per trading e trasferimenti senza opacita',
+Obiettivo: infrastruttura per trading e trasferimenti senza opacità,
 con rescue nativo dei fondi e anti-scam by design.
+
+Sopra la chain vive **T2T DEX**, il modulo di trading nativo (Uniswap v4 fork):
+pool concentrate, hooks con guardian check, router e pool manager.
+**MORE THAN A PLATFORM. A TRADING ECOSYSTEM.**
 
 ---
 
@@ -24,69 +28,137 @@ con rescue nativo dei fondi e anti-scam by design.
 
 | Componente | Dove | Note |
 |---|---|---|
-| **reth** | Raspberry (`/mnt/reth-archive/9818`) | Nodo EVM, systemd: `reth-testnet.service` |
-| **qpos-consensus** | Raspberry (processo separato) | Consenso QPoS, 4 validatori, slot adattivo |
-| **Blockscout** | VPS (`/opt/blockscout/docker-compose`) | Explorer, blockscout:quantum-twotrader-v2 |
+| **reth** | Raspberry (`/mnt/reth-archive/332`) | Nodo EVM, systemd: `reth-testnet.service` |
+| **qpos-consensus** | Raspberry (`~/qpos-consensus`) | Consenso QPoS, 4 validatori, slot adattivo |
+| **Blockscout** | VPS (`/opt/blockscout`) | Explorer, `blockscout:twotrader-v2` |
 | **Foundry** | Raspberry (`~/.foundry/bin`) | forge, cast, anvil |
 | **Repo** | Raspberry (`~/twotrader`) | git, branch `master` |
 
 ### Accessi
 
-- RPC testnet: `http://localhost:30334` (Raspberry) / raggiungibile dal VPS (tramite whitelist)
-- Explorer: `https://explorer-testnet.twotrader-scan.com/`
-- Deployer: `0x8d2eD8c03c62407fae385E32121172b3b12ff484` (~999.999 T2T)
-- VPS: `root@twotrader` (Blockscout)
+- RPC testnet: `http://localhost:30334` (Raspberry)
+- AuthRPC (QPoS↔Reth): `http://127.0.0.1:8553`
+- Explorer: `https://explorer-testnet.two-trader.io/`
+- Sito: `https://two-trader.com` (Vercel)
+- Deployer: `0x8d2eD8c03c62407fae385E32121172b3b12ff484`
+- VPS Blockscout: `root@imperium` (188.213.166.229)
 - Chiave deployer: in `.env.twotrader` (NON committata)
 
 ---
 
-## Stato della Testnet (Beta) — PRONTA
+## Rebranding completato (2026-10-18)
 
-Tutti i contratti del canone v1.2, DEX e DAO sono deployati e testati.
+Tutti i riferimenti a "Imperium" sono stati rimossi dal codice e dalla documentazione.
+La logica dei contratti è **invariata**, l'audit resta valido.
 
-| Componente | Indirizzo | Stato |
-|---|---|---|
-| tT2T | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B | ✅ |
-| GuardianRegistry v1.2 | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 | ✅ |
-| DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e | ✅ |
-| TwotraderMessenger v1.2 | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 | ✅ |
-| TwotraderBridgeRoot v1.2 | 0xAD33475552A4ffEcCaE0A1EEE2b432552191D61c | ✅ |
-| TwotraderBridgeChild v1.2 | 0xF305c0c0c2d6bA082892d16418890C8DB7C5E201 | ✅ |
-| TwotraderPoolManager | 0xdb9175d0d41b40b1667ea947ff38b96144a900d4 | ✅ (Fixato) |
-| TwotraderRouter | 0x743c8f316bf7d18ad139fec23754293b244e5913 | ✅ |
-| TwotraderHooks (fix tick) | 0xc6c21de82b1e1e3be0c8305c28faf8a9192800c0 | ✅ (Fixato) |
-| TimelockController | 0xf621898a59cd792cb0bef8ba46226ef3cddcb922 | ✅ |
-| TwotraderDAO | 0x757ac427055fad1ddb235bb84248ef489b9a7f6d | ✅ |
+### Mappatura nomi
 
-### Test superati (End-to-End su testnet)
-- DepositCrossChain, Firme 3/3, verifyDecision, finalizeDeposit, Replay revert, Veto, Swap DEX, Proposta DAO.
+| Vecchio | Nuovo |
+|---|---|
+| `IMP.sol` / `contract IMP` | `TwoTrader.sol` / `contract TwoTrader` |
+| `tIMP.sol` / `contract tIMP` | `tTwoTrader.sol` / `contract tTwoTrader` |
+| `IMPUSD.sol` | `T2TUSD.sol` |
+| `IMPStaking.sol` | `T2TStaking.sol` |
+| `ImperiumBridge*` | `T2TBridge*` |
+| `ImperiumMessenger` | `T2TMessenger` |
+| `ImperiumRouter` | `T2TRouter` |
+| `ImperiumHooks` | `T2THooks` |
+| `ImperiumPoolManager` | `T2TPoolManager` |
+| `ImperiumProtocolFees` | `T2TProtocolFees` |
+| `ImperiumPair` / `ImperiumFactory` | `T2TPair` / `T2TFactory` |
+| `ImperiumVault` | `T2TVault` |
+| `ImperiumDAO` | `T2TDAO` |
+| **Symbol `"IMP"`** | **`"T2T"`** |
+| **Symbol `"tIMP"`** | **`"tT2T"`** |
+| Display name `"Imperium"` | `"Two-Trader"` |
+| Display name `"Imperium Testnet"` | `"Two-Trader Testnet"` |
+
+### Supply e allocazioni (INVARIATE — audit valido)
+
+| Token | MAX_SUPPLY | INITIAL_SUPPLY | Allocazioni |
+|---|---|---|---|
+| **TwoTrader** (mainnet) | 1.000.000.000 T2T | 100.000.000 T2T | 100M al deployer |
+| **tTwoTrader** (testnet) | 1.000.000.000 tT2T | 210.000.000 tT2T | 100M owner + 100M faucet + 10M bridge |
+
+### Test
+
+- **51/51 test passati** (10 suite)
+- Nessuna modifica alla logica
+- Audit valido (bytecode logico identico)
 
 ---
 
-## Mainnet (Chain ID 9819)
+## Stato della Testnet (Chain 332) — PRONTA MA NON AVVIATA
+
+Configurazione pronta, chain non ancora avviata.
+
+### Configurazione
+
+| Elemento | Percorso | Stato |
+|---|---|---|
+| Genesis | `/home/imperium-node/genesis-332.json` | ✅ creato (chainId 332) |
+| Datadir Reth | `/mnt/reth-archive/332` | ✅ creato |
+| JWT | `/mnt/reth-archive/332/jwt.hex` | ✅ generato |
+| QPoS config | `qpos-consensus/src/config.rs` | ✅ chain_id 332 |
+| QPoS validators | `/home/imperium-node/.t2t/validators/` | ✅ copiati (4 file JSON) |
+| Systemd Reth | `/etc/systemd/system/reth-testnet.service` | ✅ aggiornato a 332 |
+| Systemd Description | "Reth Node - T2T Testnet (Chain ID 332)" | ✅ aggiornato |
+| Vecchie chain 9818/9819 | `/mnt/reth-archive/` | ✅ cancellate |
+| Backup obsoleti | `broadcast.bak.*`, `cache.bak.*` | ✅ rimossi |
+
+### Contratti (da deployare sulla chain 332)
+
+Tutti i contratti sono pronti per il deploy, ma **nessun indirizzo esiste ancora** sulla chain 332 (è appena stata resettata).
+
+| Contratto | Stato |
+|---|---|
+| TwoTrader / tTwoTrader | ⏳ da deployare |
+| T2TUSD | ⏳ da deployare |
+| T2TStaking | ⏳ da deployare |
+| T2TVault | ⏳ da deployare |
+| T2TFactory | ⏳ da deployare |
+| T2TMessenger | ⏳ da deployare |
+| T2TBridgeRoot | ⏳ da deployare |
+| T2TBridgeChild | ⏳ da deployare |
+| T2TPoolManager | ⏳ da deployare |
+| T2TRouter | ⏳ da deployare |
+| T2THooks | ⏳ da deployare |
+| T2TDAO + TimelockController | ⏳ da deployare |
+| GuardianRegistry (sentinelle) | ⏳ da deployare |
+| DecisionRegistry (canone) | ⏳ da deployare |
+
+---
+
+## Mainnet (Chain 333) — STANDBY
 
 **STATO: NON AVVIATA.**
-Nessun contratto deployato. Il lancio avverrà solo dopo il periodo di beta testing e la validazione finale del codice. Tutti gli indirizzi della mainnet verranno generati e documentati al momento del deploy.
+Nessun contratto deployato. Il lancio avverrà solo dopo il periodo di beta testing sulla testnet 332 e la validazione finale del codice.
+
+Tutti gli indirizzi della mainnet verranno generati e documentati al momento del deploy.
 
 ---
 
 ## Sicurezza e Infrastruttura
 
-- ✅ Firewall UFW attivo sul Raspberry (Porta 30334 non esposta pubblicamente).
+- ✅ Firewall UFW attivo sul Raspberry (RPC 30334 non esposto pubblicamente)
+- ✅ Whitelist IP VPS (188.213.166.229) per RPC/WS — **DA FARE**
 - ✅ Disco VPS: 16% (128 GB liberi)
 - ✅ Disco Raspberry: /mnt/reth-archive 22% (349 GB liberi)
-- ✅ Slot adattivo: formula fixata (`base * scale / (scale + pending)`).
-- ⚠️ `qi-blocks`/`qi-attestations` crescono ~2 GB/giorno (da monitorare).
-- ⚠️ Zero peer (chain privata, non pubblica ancora).
+- ✅ Slot adattivo: formula fixata (`base * scale / (scale + pending)`)
+- ⚠️ `qi-blocks`/`qi-attestations` crescono ~2 GB/giorno (da monitorare)
+- ⚠️ Zero peer (chain privata, non pubblica ancora)
 
 ---
 
 ## Prossimo passo
 
-1. Consegna ai betatester (Guide e UI pronte).
-2. Monitoraggio 24/7 per fix rapidi.
-3. Preparazione script per il deploy Mainnet.
-4. PromoteGovernance (solo al pre-lancio pubblico).
+1. **Avviare la chain 332** (Reth + QPoS)
+2. **Deployare i contratti** con uno script unico ("deploy compresso")
+3. **Registrare i guardian** (sentinelle) e impostare lo stake
+4. **Creare la pool** T2T/mUSDC sul T2T DEX
+5. **Riavviare Blockscout** con il nuovo logo e verificare la chain
+6. **Aggiornare `.env` e landing page** con i nuovi indirizzi
+7. **Onboarding betatester**
 
 ---
 
@@ -97,4 +169,9 @@ dei short, senza dump del 30% in pochi giorni, con token rescue nativo,
 revert delle tx non confermate in 24h, anti-scam by design.
 Il canone delle decisioni e' l'implementazione di questa visione."
 
-**MORE THAN A PLATFORM. A TRADING ECOSYSTEM.**
+**Le sentinelle** sono robot quantistici autonomi (nodi AI/quantistici) che monitorano
+la blockchain e attivano protocolli di sicurezza senza intervento umano.
+Sono implementate in `GuardianRegistry` (identità) + `DecisionLib` (firma 3/5)
++ `DecisionRegistry` (veto) + `qpos-consensus` (slot adattivo).
+
+**TRADE. ANALYZE. GROW.**
