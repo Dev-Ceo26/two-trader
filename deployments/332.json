@@ -1,0 +1,12 @@
+{
+  "SLEAddressProvider": "0x5bc539f6f851d920e96e5f9858763a99d1f18d2b",
+  "PoolRegistry": "0xbea13f68ae21fc20a07fa863ff136756e9031cd0",
+  "ConstantProductCurve": "0x7583e62f438f701d6f3d2d339317c73dffd11542",
+  "RegimeDetector": "0x155cf116dfbfa2c5f10f73137755051f1ecf40b9",
+  "CalmStrategy": "0x9f7063339479a0d0652144b97d6cbb7ff151cc8a",
+  "VolatileStrategy": "0x63b3b910be2ef843dbe920df2ccc032fe5143a6b",
+  "CriticalStrategy": "0xc973fbf9126adc1dc8074938fb679660a4e25d86",
+  "StrategySelector": "0x96430e1660f546bf8f14772a093a6acfb8e15e80",
+  "PoolManager": "0x1b5cb3f7b1d5632a718b99dc43929cf2de5506aa",
+  "T2TRouter": "0x5902963acc81be695b7fac379295623e76071c4e"
+}
