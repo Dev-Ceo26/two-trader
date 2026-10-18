@@ -19,7 +19,7 @@ contract RevokeDeployer is Script {
         address timelock = vm.envAddress("TIMELOCK");
         address guardianRegistry = vm.envAddress("GUARDIAN_REGISTRY");
         address decisionRegistry = vm.envAddress("DECISION_REGISTRY");
-        address messenger = vm.envAddress("IMPERIUM_MESSENGER");
+        address messenger = vm.envAddress("T2T_MESSENGER");
         address bridgeRoot = vm.envAddress("BRIDGE_ROOT");
         address bridgeChild = vm.envAddress("BRIDGE_CHILD");
 

@@ -32,7 +32,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 //  ██║██║╚██╔╝██║██╔═══╝ ██╔══╝  ██╔══██╗██║██║   ██║██║╚██╔╝██║
 //  ██║██║ ╚═╝ ██║██║     ███████╗██║  ██║██║╚██████╔╝██║ ╚═╝ ██║
 //  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
-//                    QUANTUM IMPERIUM CHAIN
+//                    QUANTUM T2T CHAIN
 
 /// @title T2TPoolManager
 /// @notice Holds the state for all pools. UUPS upgradable.
@@ -53,7 +53,7 @@ contract T2TPoolManager is
     using CurrencyReserves for Currency;
     using CustomRevert for bytes4;
 
-    string public constant LOGO_URI = "https://imperiumscan.com/assets/logo.png";
+    string public constant LOGO_URI = "https://T2Tscan.com/assets/logo.png";
 
     int24 private constant MAX_TICK_SPACING = TickMath.MAX_TICK_SPACING;
     int24 private constant MIN_TICK_SPACING = TickMath.MIN_TICK_SPACING;
