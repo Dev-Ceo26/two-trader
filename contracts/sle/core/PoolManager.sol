@@ -7,12 +7,13 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IPoolManager} from "../interfaces/IPoolManager.sol";
 import {ICurve} from "../interfaces/ICurve.sol";
+import {ISLEAddressProvider} from "../interfaces/ISLEAddressProvider.sol";
 import {PoolRegistry} from "./PoolRegistry.sol";
 
 /// @title PoolManager
-/// @notice Core AMM SLE. Router = unico chiamante. Fee <= MAX_FEE (200 bps).
-/// @dev Immutabile. SafeERC20 + nonReentrant. CEI. Token fee-on-transfer non supportati.
-///      Depositi non proporzionali rifiutati (tolleranza 1 bps, cross-multiply 512-bit).
+/// @notice Core AMM SLE. Router = unico chiamante (letto dal provider).
+/// @dev Provider immutable. onlyRouter legge provider.router() ad ogni chiamata.
+///      Router non configurabile nel PM (nessun setter). Configurazione gestita dal provider.
 contract PoolManager is IPoolManager, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -21,7 +22,7 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
     uint256 public constant PROPORTIONAL_TOLERANCE_BPS = 1;
 
     PoolRegistry public immutable registry;
-    address public immutable override router;
+    ISLEAddressProvider public immutable provider;
 
     struct PoolState {
         uint256 reserve0;
@@ -35,15 +36,25 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
     mapping(bytes32 => mapping(address => uint256)) public lpBalances;
 
     modifier onlyRouter() {
-        if (msg.sender != router) revert UnauthorizedCaller(msg.sender);
+        if (msg.sender != provider.router()) revert UnauthorizedCaller(msg.sender);
         _;
     }
 
-    constructor(address registry_, address router_) {
-        if (registry_ == address(0) || router_ == address(0)) revert ZeroAddress();
+    constructor(address registry_, address provider_) {
+        if (registry_ == address(0) || provider_ == address(0)) revert ZeroAddress();
         registry = PoolRegistry(registry_);
-        router = router_;
+        provider = ISLEAddressProvider(provider_);
     }
+
+    function router() external view override returns (address) {
+        return provider.router();
+    }
+
+    function providerAddress() external view override returns (address) {
+        return address(provider);
+    }
+
+    // ───────────── Swap ─────────────
 
     function swap(
         bytes32 poolId, bool zeroForOne, uint256 amountIn, uint256 minAmountOut,
@@ -90,6 +101,8 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
 
         emit Swap(poolId, payer, zeroForOne, amountIn, amountOut, feeAmount, s.reserve0, s.reserve1);
     }
+
+    // ───────────── Add / Remove ─────────────
 
     function addLiquidity(bytes32 poolId, uint256 amount0, uint256 amount1, address onBehalfOf)
         external override onlyRouter nonReentrant returns (uint256 lpMinted)
@@ -164,13 +177,14 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
         emit LiquidityRemoved(poolId, owner, recipient, amount0, amount1, lpAmount);
     }
 
+    // ───────────── Interni ─────────────
+
     function _safeTransferIn(IERC20 token, uint256 amount) internal {
         uint256 before = token.balanceOf(address(this));
         token.safeTransferFrom(msg.sender, address(this), amount);
         if (token.balanceOf(address(this)) - before != amount) revert FeeOnTransferNotSupported();
     }
 
-    /// @dev diff * 10000 <= max  <=>  diff <= floor(max / 10000)
     function _proportionalEnough(
         uint256 amount0, uint256 reserve0,
         uint256 amount1, uint256 reserve1
@@ -226,6 +240,7 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
         return diffL <= qLow;
     }
 
+    // ───────────── Views ─────────────
     function getReserves(bytes32 poolId) external view override returns (uint256, uint256) {
         PoolState storage s = poolStates[poolId];
         return (s.reserve0, s.reserve1);

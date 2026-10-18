@@ -8,6 +8,7 @@ import {PoolManager} from "../../contracts/sle/core/PoolManager.sol";
 import {PoolRegistry} from "../../contracts/sle/core/PoolRegistry.sol";
 import {ConstantProductCurve} from "../../contracts/sle/curves/ConstantProductCurve.sol";
 import {IPoolManager} from "../../contracts/sle/interfaces/IPoolManager.sol";
+import {SLEAddressProvider} from "../../contracts/sle/core/SLEAddressProvider.sol";
 import {ICurve} from "../../contracts/sle/interfaces/ICurve.sol";
 
 contract MockERC20 is ERC20 {
@@ -95,6 +96,7 @@ contract PoolManagerTest is Test {
     PoolRegistry internal registry;
     ConstantProductCurve internal curve;
     MockRouter internal router;
+    SLEAddressProvider internal provider;
 
     MockERC20 internal token0;
     MockERC20 internal token1;
@@ -112,10 +114,14 @@ contract PoolManagerTest is Test {
         curve = new ConstantProductCurve();
         registry = new PoolRegistry(owner);
 
-        // Deploy router prima del PoolManager
+        // Ordine: provider -> PM(registry, provider) -> router -> setEndpoints(router, pm)
+        provider = new SLEAddressProvider(owner);
         router = new MockRouter();
-        pm = new PoolManager(address(registry), address(router));
+        pm = new PoolManager(address(registry), address(provider));
         router.setPoolManager(address(pm));
+
+        vm.prank(owner);
+        provider.setEndpoints(address(router), address(pm));
 
         token0 = new MockERC20("Token0", "T0");
         token1 = new MockERC20("Token1", "T1");
@@ -174,9 +180,18 @@ contract PoolManagerTest is Test {
         pm.removeLiquidity(poolId, 1, address(this), address(this));
     }
 
-    function test_constructor_zeroRouterReverts() public {
+    function test_constructor_zeroProviderReverts() public {
         vm.expectRevert(IPoolManager.ZeroAddress.selector);
         new PoolManager(address(registry), address(0));
+    }
+
+    function test_swap_providerNotConfiguredReverts() public {
+        // Deploy nuovo provider (non configurato) e nuovo PM
+        SLEAddressProvider p2 = new SLEAddressProvider(owner);
+        PoolManager pm2 = new PoolManager(address(registry), address(p2));
+        // Provider non configurato -> router() = address(0) -> chiamate rifiutate
+        vm.expectRevert(abi.encodeWithSelector(IPoolManager.UnauthorizedCaller.selector, address(this)));
+        pm2.swap(poolId, true, 1000e18, 0, bob, block.timestamp + 100, 30, address(this));
     }
 
     // ───────────── Add liquidity ─────────────

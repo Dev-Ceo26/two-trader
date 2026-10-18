@@ -2,8 +2,8 @@
 pragma solidity 0.8.26;
 
 /// @title IPoolManager
-/// @notice Interfaccia del core AMM. Router è l'unico chiamante autorizzato.
-/// @dev Fee <= MAX_FEE (200 bps). LP assegnate a onBehalfOf. Prelievo da owner.
+/// @notice Interfaccia del core AMM. Router è l'unico chiamante autorizzato
+///         (letto dal provider). Fee <= MAX_FEE. LP a onBehalfOf.
 interface IPoolManager {
     event Swap(bytes32 indexed poolId, address indexed payer, bool zeroForOne, uint256 amountIn, uint256 amountOut, uint256 feeAmount, uint256 reserve0, uint256 reserve1);
     event LiquidityAdded(bytes32 indexed poolId, address indexed onBehalfOf, uint256 amount0, uint256 amount1, uint256 lpMinted);
@@ -31,4 +31,5 @@ interface IPoolManager {
     function getTotalLPSupply(bytes32 poolId) external view returns (uint256);
     function MAX_FEE() external view returns (uint256);
     function router() external view returns (address);
+    function providerAddress() external view returns (address);
 }
