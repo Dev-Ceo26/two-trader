@@ -9,6 +9,7 @@ import {IPoolManager} from "../interfaces/IPoolManager.sol";
 import {ICurve} from "../interfaces/ICurve.sol";
 import {ISLEAddressProvider} from "../interfaces/ISLEAddressProvider.sol";
 import {PoolRegistry} from "./PoolRegistry.sol";
+import {ProportionalMath} from "../libraries/ProportionalMath.sol";
 
 /// @title PoolManager
 /// @notice Core AMM SLE. Router = unico chiamante (letto dal provider).
@@ -125,7 +126,7 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
             s.totalLPSupply = root;
         } else {
             if (s.reserve0 == 0 || s.reserve1 == 0) revert InsufficientLiquidity();
-            if (!_proportionalEnough(amount0, s.reserve0, amount1, s.reserve1)) {
+            if (!ProportionalMath.proportionalEnough(amount0, s.reserve0, amount1, s.reserve1)) {
                 revert InsufficientLiquidity();
             }
             uint256 lp0 = Math.mulDiv(amount0, s.totalLPSupply, s.reserve0);
@@ -183,61 +184,6 @@ contract PoolManager is IPoolManager, ReentrancyGuard {
         uint256 before = token.balanceOf(address(this));
         token.safeTransferFrom(msg.sender, address(this), amount);
         if (token.balanceOf(address(this)) - before != amount) revert FeeOnTransferNotSupported();
-    }
-
-    function _proportionalEnough(
-        uint256 amount0, uint256 reserve0,
-        uint256 amount1, uint256 reserve1
-    ) internal pure returns (bool) {
-        uint256 p0L;
-        uint256 p0H;
-        assembly {
-            let mm := mulmod(amount0, reserve1, not(0))
-            p0L := mul(amount0, reserve1)
-            p0H := sub(sub(mm, p0L), lt(mm, p0L))
-        }
-        uint256 p1L;
-        uint256 p1H;
-        assembly {
-            let mm := mulmod(amount1, reserve0, not(0))
-            p1L := mul(amount1, reserve0)
-            p1H := sub(sub(mm, p1L), lt(mm, p1L))
-        }
-
-        if (p0H == p1H && p0L == p1L) return true;
-
-        bool p0Greater = p0H > p1H || (p0H == p1H && p0L > p1L);
-        uint256 maxH = p0Greater ? p0H : p1H;
-        uint256 maxL = p0Greater ? p0L : p1L;
-        uint256 minH = p0Greater ? p1H : p0H;
-        uint256 minL = p0Greater ? p1L : p0L;
-
-        uint256 diffH;
-        uint256 diffL;
-        unchecked {
-            diffL = maxL - minL;
-            diffH = maxH - minH;
-            if (maxL < minL) diffH -= 1;
-        }
-
-        uint256 quotientH = maxH / 10000;
-        uint256 remainderH = maxH % 10000;
-
-        uint256 qLow;
-        uint256 rem = remainderH;
-        for (uint256 i = 256; i > 0; ) {
-            unchecked { --i; }
-            uint256 bit = (maxL >> i) & 1;
-            rem = rem * 2 + bit;
-            if (rem >= 10000) {
-                rem -= 10000;
-                qLow |= uint256(1) << i;
-            }
-        }
-
-        if (diffH < quotientH) return true;
-        if (diffH > quotientH) return false;
-        return diffL <= qLow;
     }
 
     // ───────────── Views ─────────────
