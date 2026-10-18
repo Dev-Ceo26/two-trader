@@ -44,6 +44,6 @@ Thumbs.db
 # Standard JSON inputs per explorer verification (artefatti locali)
 *-standard-json.json
 .env.anvil
-.env.imperium.source
+.env.twotrader.source
 _legacy/
 .env.testnet
