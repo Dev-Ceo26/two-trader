@@ -150,6 +150,91 @@ Tutti gli indirizzi della mainnet verranno generati e documentati al momento del
 
 ---
 
+## T2T Smart Liquidity Engine (SLE) v1 — Testnet-ready
+
+**Stato: COMPLETO E TESTATO.** Deployato e verificato su Anvil (chain 9818).
+
+### Panoramica
+
+SLE è il motore di liquidità originale di T2T, **scritto da zero**, non derivato da Uniswap v4 o Balancer. Licenza prevista MIT.
+
+Architettura modulare:
+- **SLEAddressProvider**: associazione one-shot e irreversibile tra Router e PoolManager (risolve il ciclo di dipendenza)
+- **PoolRegistry**: whitelist curve, registrazione pool, freeze associazione
+- **ConstantProductCurve**: AMM x·y=k, formula originale
+- **PoolManager**: contabilità, invarianti, safety net, fee cap, fee-on-transfer reject
+- **RegimeDetector**: regime CALM/VOLATILE/CRITICAL, isteresi, staleness, fail-closed
+- **StrategySelector**: matrice fail-open/fail-closed, fee clamp
+- **3 Strategie**: CalmStrategy (5 bps), VolatileStrategy (50 bps), CriticalStrategy (150 bps + block > 1% liquidità)
+- **T2TRouter**: unico entry point autorizzato, transferFrom utente→router, forceApprove, reset allowance
+
+### Statistiche test
+
+| Categoria | Numero | Cosa copre |
+|---|---|---|
+| Test totali | **161** | Unitari + integrazione + E2E |
+| Invarianti formali | **7** | 128.000 chiamate random, 0 violazioni |
+| Fuzz test | **~15** | Funzioni matematiche, swap, LP, boundary |
+| Test 512-bit | **20** | ProportionalMath isolata, overflow, max values |
+| Test access control | **~10** | OnlyRouter, owner check, provider config |
+| Test fail-closed | **17** | Detector stale/revert, strategia KO, CRITICAL |
+
+### Invarianti verificati
+
+| ID | Proprietà | Test |
+|---|---|---|
+| INV-1 | `totalLPSupply == MINIMUM_LIQUIDITY + Σ lpBalances` | invariant_INV1 |
+| INV-2 | `token.balanceOf(pm) == reserve + feeAccrued` | invariant_INV2 |
+| INV-3 | `k_after >= k_before` dopo swap | invariant_INV3 |
+| INV-4 | `MAX_FEE == 200` costante | invariant_INV4 |
+| INV-5 | LP utente ≤ total - MINIMUM_LIQUIDITY | invariant_INV5 |
+| INV-7 | Router non trattiene token | invariant_INV7 |
+| INV-8 | Allowance Router→PM sempre 0 | invariant_INV8 |
+
+### Protezioni implementate
+
+| Protezione | Dove |
+|---|---|
+| **OnlyRouter** (via provider) | PoolManager mod `onlyRouter` |
+| **Fee cap 200 bps** | PoolManager costante `MAX_FEE` |
+| **Safety net curva** | PoolManager `maxOut` su input netto |
+| **Fee-on-transfer reject** | PoolManager `_safeTransferIn` |
+| **Reentrancy** | Router `nonReentrant`, PM `nonReentrant` |
+| **Proporzionalità LP 1 bps** | `ProportionalMath.proportionalEnough` cross-multiply 512-bit |
+| **MINIMUM_LIQUIDITY lock** | PoolManager primo add |
+| **Arrotondamento prelievo** | Fee + reserve share separati |
+| **Fail-closed** | Selector: detector invalido/stale/revert → block |
+| **Provider one-shot** | Provider `setEndpoints` irreversibile |
+| **Allowance reset** | Router dopo ogni operazione |
+
+### Deploy
+
+| Ambiente | Stato | Script |
+|---|---|---|
+| **Anvil (9818)** | ✅ Deployato e verificato | `./deploy-sle.sh broadcast` |
+| **Testnet 332** | ⏳ Pronto (da deployare su chain 332) | Stesso script, `--rpc-url` diverso |
+| **Mainnet 333** | ❌ Escluso (richiede audit esterno) | — |
+
+Indirizzi del deploy Anvil in `deployments/9818.json`.
+
+### Documentazione
+
+- `docs/design/SMART-LIQUIDITY-ENGINE.md` — Specifica completa (434 righe)
+- `docs/audit/` — Pacchetto audit esterno (14 documenti)
+- `deploy-sle.sh` — Orchestratore deploy (dry-run + broadcast)
+- `script/DeploySLE.s.sol` — Script Foundry
+
+### Roadmap SLE
+
+| Fase | Stato |
+|---|---|
+| v1 (constant product, strategie deterministiche) | ✅ Completo |
+| v2 (concentrated liquidity, sentinelle AI) | ⏳ Pianificato |
+| Audit esterno | ⏳ Prossimo (pacchetto pronto) |
+| Deploy testnet 332 | ⏳ Dopo audit |
+
+---
+
 ## Prossimo passo
 
 1. **Avviare la chain 332** (Reth + QPoS)
