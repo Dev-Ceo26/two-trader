@@ -16,14 +16,13 @@ contract CriticalStrategy is IStrategy {
         return CRITICAL_FEE_BPS;
     }
 
-    /// @notice Blocca swap con amountIn > reserveIn / 100 (1% della riserva)
     function shouldBlock(
         bytes32,
         uint8,
         uint256 amountIn,
         uint256 reserveIn
     ) external pure override returns (bool) {
-        if (reserveIn == 0) return true; // pool vuoto in CRITICAL = blocco totale
+        if (reserveIn == 0) return true;
         return amountIn > (reserveIn / BLOCK_THRESHOLD_DIVISOR);
     }
 
