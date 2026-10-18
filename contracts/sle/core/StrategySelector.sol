@@ -84,16 +84,16 @@ contract StrategySelector is IStrategySelector, Ownable {
 
         // 3. CRITICAL: strategia obbligatoria, se reverte -> fail-closed
         if (regime == REGIME_CRITICAL) {
-            address strat = strategies[REGIME_CRITICAL];
-            if (strat == address(0)) {
+            address stratCritical = strategies[REGIME_CRITICAL];
+            if (stratCritical == address(0)) {
                 // Nessuna strategia critical registrata -> fail-closed
                 return (0, true);
             }
 
-            try IStrategy(strat).proposeFee(poolId, regime, amountIn) returns (uint256 f) {
+            try IStrategy(stratCritical).proposeFee(poolId, regime, amountIn) returns (uint256 f) {
                 uint256 clampedFee = f > MAX_FEE ? MAX_FEE : f;
 
-                try IStrategy(strat).shouldBlock(poolId, regime, amountIn, reserveIn) returns (bool b) {
+                try IStrategy(stratCritical).shouldBlock(poolId, regime, amountIn, reserveIn) returns (bool b) {
                     return (clampedFee, b);
                 } catch {
                     // shouldBlock fallito -> fail-closed
