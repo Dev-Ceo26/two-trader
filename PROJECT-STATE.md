@@ -224,6 +224,51 @@ Indirizzi del deploy Anvil in `deployments/9818.json`.
 - `deploy-sle.sh` — Orchestratore deploy (dry-run + broadcast)
 - `script/DeploySLE.s.sol` — Script Foundry
 
+
+### SLE v1 — Deployato e verificato su Testnet 332 (2026-10-18)
+
+**Contratti deployati:**
+
+| Contratto | Indirizzo |
+|---|---|
+| SLEAddressProvider | 0x5bC539F6F851d920E96e5f9858763a99D1f18D2b |
+| PoolRegistry | 0xBea13F68aE21Fc20a07FA863FF136756E9031cD0 |
+| ConstantProductCurve | 0x7583e62f438f701d6f3D2d339317C73dFFd11542 |
+| RegimeDetector | 0x155CF116dfbfA2c5F10F73137755051F1ECF40b9 |
+| StrategySelector | 0x96430E1660F546bF8f14772A093A6aCfb8e15e80 |
+| PoolManager | 0x1b5Cb3f7B1d5632a718B99dc43929cf2De5506AA |
+| T2TRouter | 0x5902963aCC81BE695b7FAC379295623E76071c4E |
+| CalmStrategy | 0x9F7063339479a0D0652144B97d6cBB7FF151CC8A |
+| VolatileStrategy | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B |
+| CriticalStrategy | 0xC973Fbf9126ADC1dC8074938Fb679660a4e25d86 |
+
+**Token mock per test:**
+
+| Token | Indirizzo |
+|---|---|
+| T2T mock | 0x0bc179C2D5793e726016B3938f31f2af53Cb2EDA |
+| mUSDC mock | 0x13080d47448B672053dc53e7b83b2215015d49f1 |
+
+**Pool attiva:** `0x435f2ab001745124f919981e02e9ffe5460964f442ab4b1c448795f3fcc83da7` (T2T/mUSDC, 1M liquidity iniziale).
+
+**E2E test verificato:**
+- Mint 10M T2T + 10M USDC ✅
+- Approve Router ✅
+- Registrazione pool + attivazione ✅
+- Init Detector (CALM) ✅
+- Add liquidity 1M/1M → LP 999.999 ✅
+- Swap 1000 T2T → ~998.5 USDC ✅
+- Reserves: 1.000.999,5 T2T / 999.001,5 USDC ✅
+- Fee accrued: 0,5 T2T (5 bps) ✅
+- Router pulito (0 token) ✅
+
+**Comando per replicare il test:**
+
+    cd ~/twotrader
+    source .env.testnet
+    ./script/test-sle-332.sh
+
+
 ### Roadmap SLE
 
 | Fase | Stato |
