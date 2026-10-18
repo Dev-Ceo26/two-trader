@@ -2,15 +2,15 @@
 pragma solidity 0.8.26;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {ImperiumHooks} from "../contracts/v4/ImperiumHooks.sol";
+import {T2THooks} from "../contracts/v4/T2THooks.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 import {HookMiner} from "lib/v4-periphery/test/shared/HookMiner.sol";
 import {GuardianRegistry} from "../contracts/governance/GuardianRegistry.sol";
 
-/// @title DeployImperiumHooks
+/// @title DeployT2THooks
 /// @notice Mine salt per bit 0xC0, deploy diretto via CREATE2 (NO proxy).
-contract DeployImperiumHooks is Script {
+contract DeployT2THooks is Script {
     address constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
     function run() external {
@@ -30,7 +30,7 @@ contract DeployImperiumHooks is Script {
         console2.log("Owner:", owner);
         console2.log("CREATE2 deployer:", CREATE2_DEPLOYER);
 
-        bytes memory creationCode = type(ImperiumHooks).creationCode;
+        bytes memory creationCode = type(T2THooks).creationCode;
         bytes memory constructorArgs =
             abi.encode(IPoolManager(poolManager), GuardianRegistry(guardianRegistry), owner);
 
@@ -42,14 +42,14 @@ contract DeployImperiumHooks is Script {
 
         vm.startBroadcast();
 
-        ImperiumHooks hooks = new ImperiumHooks{salt: salt}(
+        T2THooks hooks = new T2THooks{salt: salt}(
             IPoolManager(poolManager),
             GuardianRegistry(guardianRegistry),
             owner
         );
 
         require(address(hooks) == predictedAddr, "address mismatch");
-        console2.log("ImperiumHooks deployed:", address(hooks));
+        console2.log("T2THooks deployed:", address(hooks));
 
         uint160 masked = uint160(address(hooks)) & Hooks.ALL_HOOK_MASK;
         require(masked == flags, "flags mismatch");

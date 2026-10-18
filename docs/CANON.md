@@ -242,10 +242,10 @@ I vuoti mappati nel `VOIDS.md` sono:
 
 | Scenario | Fee protocollo | Gas |
 |---|---|---|
-| Deposito diretto su Twotrader Chain | **0** | IMP |
-| Deposito via CEX → Twotrader | **0** | IMP |
+| Deposito diretto su Twotrader Chain | **0** | T2T |
+| Deposito via CEX → Twotrader | **0** | T2T |
 | Cross-chain (da ETH, TRX, BSC...) | **>0** (configurabile) | Entrambe |
-| Fast/normal/slow | UX wallet | IMP |
+| Fast/normal/slow | UX wallet | T2T |
 
 ### Regole hard-coded (immutabili)
 
@@ -266,9 +266,9 @@ I vuoti mappati nel `VOIDS.md` sono:
   - se `fee == 0` → `feeRecipient == address(0)`
   - `fee <= amount * MAX_FEE_BPS / 10000`
 
-### Gas in IMP
+### Gas in T2T
 
-Il gas si paga in IMP sulla chain Twotrader. **Fuori dal canone:** gestito
+Il gas si paga in T2T sulla chain Twotrader. **Fuori dal canone:** gestito
 dal wallet/client, non dal protocollo.
 
 ### Fast/normal/slow

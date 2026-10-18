@@ -22,9 +22,9 @@ Primo collaudo end-to-end del canone v1.2 sulla **testnet pubblica** Twotrader
 
 | Guardian | Address | Stake |
 |---|---|---|
-| G1 (deployer) | 0x8d2eD8c03c62407fae385E32121172b3b12ff484 | 1000 IMP |
-| G2 | 0x10872E0e2eCC9883CDCbecD74C8e6eb856c31C72 | 1000 IMP |
-| G3 | 0x1E48B5f4a711288fD7456Fbfa94C6F76E4bC9d87 | 1000 IMP |
+| G1 (deployer) | 0x8d2eD8c03c62407fae385E32121172b3b12ff484 | 1000 T2T |
+| G2 | 0x10872E0e2eCC9883CDCbecD74C8e6eb856c31C72 | 1000 T2T |
+| G3 | 0x1E48B5f4a711288fD7456Fbfa94C6F76E4bC9d87 | 1000 T2T |
 
 ### Configurazione
 

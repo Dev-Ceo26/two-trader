@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {ImperiumRouter} from "../contracts/v4/ImperiumRouter.sol";
+import {T2TRouter} from "../contracts/v4/T2TRouter.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Currency} from "v4-core/types/Currency.sol";
@@ -43,15 +43,15 @@ contract AddLiquidity is Script {
         int24 tickUpper;
         int24 currentTick;
         if (uint160(timp) < uint160(mockUsdc)) {
-            // token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
-            // 1 tIMP = 1 USDC in valore -> tick ~ -276324
+            // token0 = tTwoTrader (18 dec), token1 = MockUSDC (6 dec)
+            // 1 tTwoTrader = 1 USDC in valore -> tick ~ -276324
             currentTick = -276324;
             // Range ampio: ±10000 tick (circa 2.7x in valore)
             tickLower = -286320;  // -276324 - 9996
             tickUpper = -266340;  // -276324 + 9984
         } else {
-            // token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
-            // 1 USDC = 1 tIMP in valore -> tick ~ 276324
+            // token0 = MockUSDC (6 dec), token1 = tTwoTrader (18 dec)
+            // 1 USDC = 1 tTwoTrader in valore -> tick ~ 276324
             currentTick = 276324;
             tickLower = 266340;
             tickUpper = 286320;
@@ -63,18 +63,18 @@ contract AddLiquidity is Script {
         uint256 amount0;
         uint256 amount1;
         if (uint160(timp) < uint160(mockUsdc)) {
-            // token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
+            // token0 = tTwoTrader (18 dec), token1 = MockUSDC (6 dec)
             amount0 = 100_000 * 10 ** 18;
             amount1 = 100_000 * 10 ** 6;
         } else {
-            // token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
+            // token0 = MockUSDC (6 dec), token1 = tTwoTrader (18 dec)
             amount0 = 100_000 * 10 ** 6;
             amount1 = 100_000 * 10 ** 18;
         }
 
         console2.log("Adding liquidity (range -60/+60)...");
 
-        ImperiumRouter(router).addLiquidity(
+        T2TRouter(router).addLiquidity(
             key,
             tickLower,
             tickUpper,

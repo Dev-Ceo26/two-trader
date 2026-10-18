@@ -11,14 +11,14 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {GuardianRegistry} from "../governance/GuardianRegistry.sol";
 
-/// @title ImperiumHooks
-/// @notice Uniswap v4 hook per Quantum Imperium Chain.
+/// @title T2THooks
+/// @notice Uniswap v4 hook per Two-Trader Chain.
 ///         Implementa beforeSwap + afterSwap.
 ///         Bit richiesti: BEFORE_SWAP_FLAG | AFTER_SWAP_FLAG = 0xC0.
 /// @dev IMMUTABILE. L'indirizzo deve avere i bit 0xC0, ottenuti via CREATE2 + HookMiner.
 ///      Upgradability non compatibile con il pattern proxy perché il PoolManager
 ///      verifica i bit dell'indirizzo dell'hook. Migrazione futura: Diamond (EIP-2535).
-contract ImperiumHooks is IHooks, Ownable, ReentrancyGuard {
+contract T2THooks is IHooks, Ownable, ReentrancyGuard {
     using PoolIdLibrary for PoolKey;
 
     // ───────────── Errors ─────────────

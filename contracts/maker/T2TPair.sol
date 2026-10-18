@@ -10,11 +10,11 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * @title ImperiumPair
+ * @title T2TPair
  * @notice Coppia AMM (x*y=k) con token LP.
  * @dev UUPS upgradable, Ownable (transitorio). In futuro: DAO.
  */
-contract ImperiumPair is
+contract T2TPair is
     ERC20Upgradeable,
     ReentrancyGuardTransient,
     UUPSUpgradeable,
@@ -64,7 +64,7 @@ contract ImperiumPair is
         require(initialOwner != address(0), "owner zero");
         require(_feeBps <= MAX_FEE_BPS, "fee too high");
 
-        __ERC20_init("Imperium LP", "ILP");
+        __ERC20_init("Two-Trader LP", "ILP");
         __Ownable_init(initialOwner);
 
         token0 = IERC20(_token0);

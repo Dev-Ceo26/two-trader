@@ -3,13 +3,13 @@ pragma solidity ^0.8.20;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {IMPUSD} from "../../src/IMPUSD.sol";
+import {T2TUSD} from "../../src/T2TUSD.sol";
 import {MasterMinter} from "../../src/MasterMinter.sol";
 import {MockUSDC} from "../../src/MockUSDC.sol";
 import {MockUSDT} from "../../src/MockUSDT.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract DeployIMPUSD is Script {
+contract DeployT2TUSD is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
@@ -18,7 +18,7 @@ contract DeployIMPUSD is Script {
         address feeCollector = vm.envAddress("FEE_COLLECTOR_ADDRESS");
         address safeTeamVault = vm.envAddress("SAFE_TEAM_VAULT_ADDRESS");
 
-        console.log("=== Deploy IMPUSD ===");
+        console.log("=== Deploy T2TUSD ===");
         console.log("Deployer: %s", deployer);
 
         vm.startBroadcast(deployerPrivateKey);
@@ -34,12 +34,12 @@ contract DeployIMPUSD is Script {
         console.log("MasterMinter: %s", address(masterMinter));
 
         // 3. Deploy implementation
-        IMPUSD impl = new IMPUSD();
-        console.log("IMPUSD impl: %s", address(impl));
+        T2TUSD impl = new T2TUSD();
+        console.log("T2TUSD impl: %s", address(impl));
 
         // 4. Deploy proxy + initialize
         bytes memory initData = abi.encodeWithSelector(
-            IMPUSD.initialize.selector,
+            T2TUSD.initialize.selector,
             address(mockUsdc),
             address(mockUsdt),
             address(masterMinter),
@@ -49,7 +49,7 @@ contract DeployIMPUSD is Script {
             admin
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        console.log("IMPUSD proxy: %s", address(proxy));
+        console.log("T2TUSD proxy: %s", address(proxy));
 
         // 5. Collega MasterMinter al token
         masterMinter.setToken(address(proxy));
@@ -57,7 +57,7 @@ contract DeployIMPUSD is Script {
         vm.stopBroadcast();
 
         console.log("=== DEPLOY COMPLETE ===");
-        console.log("IMPUSD (proxy): %s", address(proxy));
+        console.log("T2TUSD (proxy): %s", address(proxy));
         console.log("MasterMinter:  %s", address(masterMinter));
         console.log("MockUSDC:      %s", address(mockUsdc));
         console.log("MockUSDT:      %s", address(mockUsdt));

@@ -10,7 +10,7 @@
 
 | # | Contratto | Indirizzo |
 |---|---|---|
-| 1 | tIMP | 0xBea13F68aE21Fc20a07FA863FF136756E9031cD0 |
+| 1 | tT2T | 0xBea13F68aE21Fc20a07FA863FF136756E9031cD0 |
 | 2 | TwotraderVault | 0x155CF116dfbfA2c5F10F73137755051F1ECF40b9 |
 | 3 | FeeDistributor | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B |
 | 4 | TwotraderFactory | 0x96430E1660F546bF8f14772A093A6aCfb8e15e80 |
@@ -29,14 +29,14 @@
 | 17 | IMPUSD (impl) | 0x684129DF35e180B3B010043E000271118A0F7951 |
 | 18 | IMPUSD (proxy) | 0x200c1771b4c6BA4b24F41F8F3a447bF7585DD2af |
 
-## Configurazione tIMP
+## Configurazione tT2T
 
-- Nome: Test Twotrader (tIMP)
-- MAX_SUPPLY: 1.000.000.000 tIMP
-- Owner: 100.000.000 tIMP
-- Faucet: 100.000.000 tIMP
-- Bridge: 10.000.000 tIMP
-- Totale mintato: 210.000.000 tIMP
+- Nome: Test Twotrader (tT2T)
+- MAX_SUPPLY: 1.000.000.000 tT2T
+- Owner: 100.000.000 tT2T
+- Faucet: 100.000.000 tT2T
+- Bridge: 10.000.000 tT2T
+- Totale mintato: 210.000.000 tT2T
 
 ## TwotraderHooks
 
@@ -44,7 +44,7 @@
 - Owner: 0x8d2ed8c03c62407fae385e32121172b3b12ff484
 - PoolManager: 0xf45BCA196C5ACf2587DE02bEc0c8C1dF64bf84c8
 - GuardianRegistry: 0x7fFCB909D502cf5092814c0a611f25b6d9d9234c
-- GuardianRewardPerSwap: 0.001 tIMP (1e15)
+- GuardianRewardPerSwap: 0.001 tT2T (1e15)
 
 ## Guardian (testnet)
 

@@ -4,10 +4,10 @@ pragma solidity ^0.8.20;
 import {Script, console} from "forge-std/Script.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import {ImperiumDAO} from "../contracts/governance/ImperiumDAO.sol";
+import {T2TDAO} from "../contracts/governance/T2TDAO.sol";
 
 /// @title DeployDAO
-/// @notice Deploy TimelockController + ImperiumDAO.
+/// @notice Deploy TimelockController + T2TDAO.
 ///         Il DAO e' il governo on-chain del protocollo.
 ///         Il Timelock e' il governor finale dei contratti (Fase C).
 ///
@@ -54,8 +54,8 @@ contract DeployDAO is Script {
         );
         console.log("TimelockController:", address(timelock));
 
-        // 2. ImperiumDAO
-        ImperiumDAO dao = new ImperiumDAO(
+        // 2. T2TDAO
+        T2TDAO dao = new T2TDAO(
             IVotes(timpAddr),
             timelock,
             votingDelay,
@@ -63,7 +63,7 @@ contract DeployDAO is Script {
             proposalThreshold,
             quorumPercent
         );
-        console.log("ImperiumDAO:       ", address(dao));
+        console.log("T2TDAO:       ", address(dao));
 
         // Nota: proposalThreshold viene letto dall'override di GovernorSettings.
         // Il valore passato al costruttore e' 0, ma se vogliamo cambiarlo va
@@ -87,7 +87,7 @@ contract DeployDAO is Script {
         console.log("");
         console.log("=== DEPLOY DAO COMPLETO ===");
         console.log("TimelockController:", address(timelock));
-        console.log("ImperiumDAO:       ", address(dao));
+        console.log("T2TDAO:       ", address(dao));
         console.log("");
         console.log("Prossimo passo: PromoteGovernance.s.sol");
         console.log("Vedi docs/ROADMAP-v1.2.md");

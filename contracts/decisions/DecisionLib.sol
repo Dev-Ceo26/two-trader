@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 /// @title DecisionLib
-/// @notice Canone delle decisioni che attraversano il bridge Imperium.
+/// @notice Canone delle decisioni che attraversano il bridge T2T.
 ///         Versione 1.2 — aggiunge fee e feeRecipient per il supporto
 ///         a depositi diretti (fee=0) e cross-chain (fee>0).
 ///         Nessun campo opaco. Nessun bytes. Solo campi nominati.

@@ -34,7 +34,7 @@ con rescue nativo dei fondi e anti-scam by design.
 
 - RPC testnet: `http://localhost:30334` (Raspberry) / raggiungibile dal VPS (tramite whitelist)
 - Explorer: `https://explorer-testnet.twotrader-scan.com/`
-- Deployer: `0x8d2eD8c03c62407fae385E32121172b3b12ff484` (~999.999 IMP)
+- Deployer: `0x8d2eD8c03c62407fae385E32121172b3b12ff484` (~999.999 T2T)
 - VPS: `root@twotrader` (Blockscout)
 - Chiave deployer: in `.env.twotrader` (NON committata)
 
@@ -46,7 +46,7 @@ Tutti i contratti del canone v1.2, DEX e DAO sono deployati e testati.
 
 | Componente | Indirizzo | Stato |
 |---|---|---|
-| tIMP | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B | ✅ |
+| tT2T | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B | ✅ |
 | GuardianRegistry v1.2 | 0xc7790e92a2e2926Fc86C4D5c01CD32f6F8363D63 | ✅ |
 | DecisionRegistry | 0x03B0A05a02Dbc65Db333343f4B2743087f3b3C5e | ✅ |
 | TwotraderMessenger v1.2 | 0x81A456c4604D318684D8100DC4dF7ef2AfA40953 | ✅ |

@@ -8,11 +8,11 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * @title ImperiumVault
+ * @title T2TVault
  * @notice Tesoreria della DAO. Custodisce fondi nativi e ERC20.
  * @dev UUPS upgradable, Ownable (transitorio). In futuro: DAO.
  */
-contract ImperiumVault is
+contract T2TVault is
     ReentrancyGuardTransient,
     UUPSUpgradeable,
     OwnableUpgradeable

@@ -18,9 +18,9 @@ contract DeployFaucet is Script {
         Faucet faucet = new Faucet(tImprAddr, deployer);
         console.log("Faucet:", address(faucet));
 
-        // Finanzia il faucet con 100.000 tIMP
+        // Finanzia il faucet con 100.000 tTwoTrader
         IERC20(tImprAddr).safeTransfer(address(faucet), 100_000 * 10 ** 18);
-        console.log("Faucet funded with 100k tIMP");
+        console.log("Faucet funded with 100k tTwoTrader");
 
         vm.stopBroadcast();
     }

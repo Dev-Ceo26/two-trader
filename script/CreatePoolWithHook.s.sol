@@ -22,10 +22,10 @@ contract CreatePoolWithHook is Script {
         console2.log("Token1:", token1);
 
         // Il prezzo dipende dall'ordine dei token nel PoolKey.
-        // Per 1 tIMP = 1 USDC in valore:
-        //   - se token0 = tIMP (18 dec), token1 = MockUSDC (6 dec)
+        // Per 1 tTwoTrader = 1 USDC in valore:
+        //   - se token0 = tTwoTrader (18 dec), token1 = MockUSDC (6 dec)
         //     price = 1e6/1e18 = 1e-12, tick ~ -276324
-        //   - se token0 = MockUSDC (6 dec), token1 = tIMP (18 dec)
+        //   - se token0 = MockUSDC (6 dec), token1 = tTwoTrader (18 dec)
         //     price = 1e18/1e6 = 1e12, tick ~ 276324
         int24 initialTick;
         if (uint160(timp) < uint160(mockUsdc)) {

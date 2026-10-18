@@ -10,21 +10,21 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {NoncesUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 
 /**
- * @title tIMP — Test Imperium
- * @notice Token di governance di Quantum Imperium (testnet).
+ * @title tTwoTrader — Two-Trader Testnet
+ * @notice Token di governance di Two-Trader (testnet).
  * @dev UUPS upgradable. Mintable fino a 1B. Burnable. 18 decimali.
  *
  * Distribuzione iniziale:
- *   - 100.000.000 tIMP all'owner
- *   - 100.000.000 tIMP al faucet
- *   -  10.000.000 tIMP al bridge
+ *   - 100.000.000 tTwoTrader all'owner
+ *   - 100.000.000 tTwoTrader al faucet
+ *   -  10.000.000 tTwoTrader al bridge
  *   ---------------------------------
- *   - 210.000.000 tIMP totali mintati all'init
+ *   - 210.000.000 tTwoTrader totali mintati all'init
  *
  * Il bridge può ricevere altri token tramite mintEcosystem() (solo owner)
  * in caso di scarsità per scambi cross-chain.
  */
-contract tIMP is
+contract tTwoTrader is
     ERC20Upgradeable,
     ERC20BurnableUpgradeable,
     ERC20PermitUpgradeable,
@@ -76,8 +76,8 @@ contract tIMP is
         require(initialFaucet != address(0), "faucet zero");
         require(initialBridge != address(0), "bridge zero");
 
-        __ERC20_init("Imperium Testnet", "tIMP");
-        __ERC20Permit_init("tIMP");
+        __ERC20_init("Two-Trader Testnet", "tT2T");
+        __ERC20Permit_init("tT2T");
         __ERC20Votes_init();
         __Ownable_init(initialOwner);
 

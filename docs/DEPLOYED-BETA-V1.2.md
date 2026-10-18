@@ -17,7 +17,7 @@ Explorer: https://explorer-testnet.twotrader-scan.com/
 ## Configurazione
 
 - Threshold: 3
-- Min stake: 1000 IMP
+- Min stake: 1000 T2T
 - Unstake cooldown: 7 giorni
 - Fee BPS: 10 (0.1%)
 - Fee recipient: 0x8d2eD8c03c62407fae385E32121172b3b12ff484
@@ -48,7 +48,7 @@ Explorer: https://explorer-testnet.twotrader-scan.com/
 ## Prossimo passo
 
 1. Generare 2 wallet per i guardian
-2. Finanziare i 2 wallet con IMP dal deployer
+2. Finanziare i 2 wallet con T2T dal deployer
 3. Registrare tutti e 3 i guardian
 4. Test end-to-end del canone (deposit → firme → finalize)
 5. Deploy DEX (PoolManager, Router, Hook)

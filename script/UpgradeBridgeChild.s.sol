@@ -15,7 +15,7 @@ contract UpgradeBridgeChild is Script {
 
         Upgrades.upgradeProxy(
             proxy,
-            "ImperiumBridgeChild.sol:ImperiumBridgeChild",
+            "T2TBridgeChild.sol:T2TBridgeChild",
             "",
             opts
         );

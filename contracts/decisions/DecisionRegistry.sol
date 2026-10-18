@@ -6,7 +6,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {DecisionLib} from "./DecisionLib.sol";
 
 /// @title DecisionRegistry
-/// @notice Registro canonico delle decisioni che attraversano Imperium.
+/// @notice Registro canonico delle decisioni che attraversano T2T.
 ///         Ogni decisione e' registrata con campi nominati, emessa in un evento
 ///         leggibile, e puo' essere vetata da VETO_ROLE.
 ///         Il veto non annulla la decisione on-chain: la marca come vetata,

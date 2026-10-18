@@ -8,12 +8,12 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * @title IMPStaking
- * @notice Stake IMP → diritto a IMPR 1:1 (whitelist DAO).
+ * @title T2TStaking
+ * @notice Stake TwoTrader → diritto a IMPR 1:1 (whitelist DAO).
  * @dev UUPS upgradable, Ownable (transitorio). In futuro: DAO.
  *      Usa ReentrancyGuard stateless (OZ v5.7.0) invece di ReentrancyGuardUpgradeable.
  */
-contract IMPStaking is
+contract T2TStaking is
     ReentrancyGuardTransient,
     UUPSUpgradeable,
     OwnableUpgradeable

@@ -4,10 +4,10 @@
 
 | Scenario | Fee protocollo | Gas |
 |---|---|---|
-| Deposito diretto su Twotrader Chain | **0** | IMP |
-| Deposito via CEX → Twotrader | **0** | IMP |
+| Deposito diretto su Twotrader Chain | **0** | T2T |
+| Deposito via CEX → Twotrader | **0** | T2T |
 | Cross-chain (da ETH, TRX, BSC...) | **>0** (configurabile) | Entrambe |
-| Fast/normal/slow | UX wallet | IMP |
+| Fast/normal/slow | UX wallet | T2T |
 
 **Regola dura:**
 - `srcChainId == dstChainId` → `fee == 0`, `feeRecipient == address(0)`
@@ -54,7 +54,7 @@ Nuova sezione 13 "Fee e gas" con:
 - Modello economico (tabella sopra)
 - Regola "deposito diretto → fee 0"
 - Regola "cross-chain → fee > 0, configurabile"
-- Gas in IMP: fuori dal canone, gestito dal wallet
+- Gas in T2T: fuori dal canone, gestito dal wallet
 - Fast/normal/slow: UX del wallet, non del protocollo
 
 ### A.5 — Test Foundry

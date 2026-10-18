@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {ImperiumRouter} from "../contracts/v4/ImperiumRouter.sol";
+import {T2TRouter} from "../contracts/v4/T2TRouter.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Currency} from "v4-core/types/Currency.sol";
@@ -37,17 +37,17 @@ contract TestSwap is Script {
         // 2) Approva il router
         IERC20(mockUsdc).approve(router, type(uint256).max);
 
-        // 3) SWAP REALE: 10 MockUSDC -> tIMP
+        // 3) SWAP REALE: 10 MockUSDC -> tTwoTrader
         // L'ordine dei token dipende dagli indirizzi:
-        //   token0 = tIMP   (0x0B30...)
+        //   token0 = tTwoTrader   (0x0B30...)
         //   token1 = MockUSDC (0x6101...)
         // Quindi USDC e' token1. Per scambiare token1 -> token0:
         //   zeroForOne = false
         uint256 amountIn = 10 * 10 ** 6; // 10 MockUSDC
 
-        console2.log("Swapping 10 MockUSDC (token1) for tIMP (token0)...");
+        console2.log("Swapping 10 MockUSDC (token1) for tTwoTrader (token0)...");
 
-        ImperiumRouter(router).swapExactInput(
+        T2TRouter(router).swapExactInput(
             key,
             false,          // zeroForOne = false: token1 -> token0
             amountIn,       // amountIn

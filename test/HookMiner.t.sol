@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {ImperiumHooks} from "../contracts/v4/ImperiumHooks.sol";
+import {T2THooks} from "../contracts/v4/T2THooks.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 import {GuardianRegistry} from "../contracts/governance/GuardianRegistry.sol";
@@ -15,7 +15,7 @@ contract HookMinerTest is Test {
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
         console2.log("Target flags:", flags);
 
-        bytes memory creationCode = type(ImperiumHooks).creationCode;
+        bytes memory creationCode = type(T2THooks).creationCode;
         bytes memory constructorArgs = abi.encode(
             IPoolManager(address(0xBEEF)),
             GuardianRegistry(address(0xCAFE)),

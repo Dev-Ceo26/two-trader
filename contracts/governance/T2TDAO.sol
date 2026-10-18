@@ -10,7 +10,7 @@ import {GovernorTimelockControl} from "@openzeppelin/contracts/governance/extens
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
-contract ImperiumDAO is
+contract T2TDAO is
     Governor,
     GovernorSettings,
     GovernorCountingSimple,
@@ -26,7 +26,7 @@ contract ImperiumDAO is
         uint256 _proposalThreshold,
         uint256 _quorumPercent
     )
-        Governor("ImperiumDAO")
+        Governor("T2TDAO")
         GovernorSettings(_votingDelay, _votingPeriod, _proposalThreshold)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(_quorumPercent)

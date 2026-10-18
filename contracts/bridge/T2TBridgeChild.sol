@@ -6,14 +6,12 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {ImperiumMessenger} from "./ImperiumMessenger.sol";
+import {T2TMessenger} from "./T2TMessenger.sol";
 import {DecisionLib} from "../decisions/DecisionLib.sol";
 
-/// @title ImperiumBridgeRoot
-/// @notice Lato root del bridge Imperium.
-///         Deposito diretto (stessa chain): fee = 0.
-///         Cross-chain: fee = amount * feeBps / 10000, con tetto MAX_FEE_BPS.
-contract ImperiumBridgeRoot is
+/// @title T2TBridgeChild
+/// @notice Lato child del bridge T2T. Speculare a BridgeRoot.
+contract T2TBridgeChild is
     ReentrancyGuardTransient,
     UUPSUpgradeable,
     AccessControlUpgradeable
@@ -23,41 +21,39 @@ contract ImperiumBridgeRoot is
     bytes32 public constant GOVERNOR_ROLE  = keccak256("GOVERNOR_ROLE");
     bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
 
-    ImperiumMessenger public messenger;
-    uint256 public l2ChainId;
+    T2TMessenger public messenger;
+    uint256 public l1ChainId;
     uint256 public thisChainId;
 
     mapping(address => bool)    public supportedTokens;
-    mapping(address => uint256) public maxAmountPerTx;
+    mapping(address => address) public localToRemote;
+    mapping(address => address) public remoteToLocal;
     mapping(bytes32 => bool)    public processedDecisions;
 
-    uint256 public depositNonce;
+    uint256 public withdrawNonce;
     bool    public paused;
 
-    /// @notice Fee in basis points per operazioni cross-chain. Configurabile dal governor.
     uint256 public feeBps;
-
-    /// @notice Destinatario della fee. Configurabile dal governor.
     address public feeRecipient;
 
-    /// @notice Deadline di default per ogni decisione (1 ora).
     uint64 public constant DEFAULT_DEADLINE = 1 hours;
 
-    event DepositInitiated(
-        address indexed sender,
+    event WithdrawalInitiated(
+        address indexed withdrawer,
         address indexed recipient,
         address indexed token,
         uint256 amount,
         uint256 nonce,
         bytes32 decisionId
     );
-    event WithdrawalFinalized(
-        bytes32 indexed decisionId,
-        address indexed token,
+    event DepositFinalized(
         address indexed recipient,
-        uint256 amount
+        address indexed token,
+        uint256 amount,
+        uint256 indexed nonce,
+        bytes32 decisionId
     );
-    event TokenRegistered(address indexed token, uint256 maxAmount);
+    event TokenRegistered(address indexed localToken, address indexed remoteToken);
     event Paused(bool state);
     event FeeBpsUpdated(uint256 oldBps, uint256 newBps);
     event FeeRecipientUpdated(address oldRecipient, address newRecipient);
@@ -69,7 +65,7 @@ contract ImperiumBridgeRoot is
 
     function initialize(
         address _messenger,
-        uint256 _l2ChainId,
+        uint256 _l1ChainId,
         address governor,
         uint256 _feeBps,
         address _feeRecipient
@@ -85,8 +81,8 @@ contract ImperiumBridgeRoot is
         _grantRole(GOVERNOR_ROLE, governor);
         _grantRole(EMERGENCY_ROLE, governor);
 
-        messenger = ImperiumMessenger(_messenger);
-        l2ChainId = _l2ChainId;
+        messenger = T2TMessenger(_messenger);
+        l1ChainId = _l1ChainId;
         thisChainId = block.chainid;
         feeBps = _feeBps;
         feeRecipient = _feeRecipient;
@@ -116,74 +112,57 @@ contract ImperiumBridgeRoot is
         feeRecipient = newRecipient;
     }
 
-    function registerToken(address token, uint256 maxAmount) external onlyRole(GOVERNOR_ROLE) {
-        require(token != address(0), "token zero");
-        supportedTokens[token] = true;
-        maxAmountPerTx[token] = maxAmount;
-        emit TokenRegistered(token, maxAmount);
+    function registerToken(address localToken, address remoteToken) external onlyRole(GOVERNOR_ROLE) {
+        require(localToken != address(0) && remoteToken != address(0), "zero token");
+        require(remoteToLocal[remoteToken] == address(0), "remote already mapped");
+        supportedTokens[localToken] = true;
+        localToRemote[localToken] = remoteToken;
+        remoteToLocal[remoteToken] = localToken;
+        emit TokenRegistered(localToken, remoteToken);
     }
 
-    /// @notice Deposito diretto: srcChainId == dstChainId, fee = 0.
-    function deposit(address token, address recipient, uint256 amount) external nonReentrant {
-        _deposit(token, recipient, amount, thisChainId, 0);
-    }
-
-    /// @notice Deposito cross-chain: srcChainId != dstChainId, fee calcolata.
-    function depositCrossChain(
-        address token,
-        address recipient,
-        uint256 amount,
-        uint256 srcChainId
-    ) external nonReentrant {
-        require(srcChainId != thisChainId, "use deposit() for same chain");
-        uint256 fee = DecisionLib.computeFee(amount, feeBps);
-        _deposit(token, recipient, amount, srcChainId, fee);
-    }
-
-    function _deposit(
-        address token,
-        address recipient,
-        uint256 amount,
-        uint256 srcChainId,
-        uint256 fee
-    ) internal {
+    /// @notice Prelievo: blocco sul child, rilascio sul root.
+    function withdrawToL1(address token, address recipient, uint256 amount) external nonReentrant {
         require(!paused, "paused");
         require(recipient != address(0), "recipient zero");
+        require(amount > 0, "amount zero");
         require(supportedTokens[token], "token not supported");
-        require(amount > 0 && amount <= maxAmountPerTx[token], "invalid amount");
-        require(fee <= amount, "fee exceeds amount");
+
+        address remoteToken = localToRemote[token];
+        require(remoteToken != address(0), "remote not mapped");
 
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
 
-        uint256 nonce = ++depositNonce;
+        uint256 nonce = ++withdrawNonce;
+        uint256 fee = DecisionLib.computeFee(amount, feeBps);
 
         DecisionLib.Decision memory d = DecisionLib.Decision({
-            kind:          DecisionLib.KIND_DEPOSIT,
+            kind:          DecisionLib.KIND_WITHDRAW,
             actor:         msg.sender,
-            token:         token,
+            token:         remoteToken,
             recipient:     recipient,
             amount:        amount,
             nonce:         nonce,
-            srcChainId:    srcChainId,
-            dstChainId:    l2ChainId,
+            srcChainId:    thisChainId,
+            dstChainId:    l1ChainId,
             deadline:      uint64(block.timestamp) + DEFAULT_DEADLINE,
-            rationaleHash: keccak256(abi.encodePacked("deposit", msg.sender, token, recipient, amount, nonce)),
+            rationaleHash: keccak256(abi.encodePacked("withdraw", msg.sender, token, recipient, amount, nonce)),
             fee:           fee,
             feeRecipient:  fee > 0 ? feeRecipient : address(0)
         });
 
         bytes32 id = messenger.recordDecision(d);
 
-        emit DepositInitiated(msg.sender, recipient, token, amount, nonce, id);
+        emit WithdrawalInitiated(msg.sender, recipient, token, amount, nonce, id);
     }
 
-    /// @notice Rilascio lato root dopo firme dei guardian.
-    function executeWithdrawal(
+    /// @notice Rilascio lato child dopo firme dei guardian.
+    function finalizeDeposit(
         DecisionLib.Decision calldata d,
         bytes[] calldata signatures
     ) external nonReentrant {
         require(!paused, "paused");
-        require(d.kind == DecisionLib.KIND_WITHDRAW, "wrong kind");
+        require(d.kind == DecisionLib.KIND_DEPOSIT, "wrong kind");
         require(d.dstChainId == thisChainId, "wrong dst chain");
         require(d.recipient != address(0), "recipient zero");
         require(d.amount > 0, "amount zero");
@@ -195,12 +174,21 @@ contract ImperiumBridgeRoot is
 
         processedDecisions[id] = true;
 
+        address localToken = remoteToLocal[d.token];
+        require(localToken != address(0), "unknown remote token");
+
         uint256 netAmount = d.amount - d.fee;
-        IERC20(d.token).safeTransfer(d.recipient, netAmount);
+        IERC20(localToken).safeTransfer(d.recipient, netAmount);
         if (d.fee > 0) {
-            IERC20(d.token).safeTransfer(d.feeRecipient, d.fee);
+            IERC20(localToken).safeTransfer(d.feeRecipient, d.fee);
         }
 
-        emit WithdrawalFinalized(id, d.token, d.recipient, d.amount);
+        emit DepositFinalized(d.recipient, localToken, d.amount, d.nonce, id);
+    }
+
+    /// @notice Prelievo di emergenza. Solo GOVERNOR_ROLE.
+    function emergencyWithdraw(address token, address to, uint256 amount) external onlyRole(GOVERNOR_ROLE) {
+        require(to != address(0), "to zero");
+        IERC20(token).safeTransfer(to, amount);
     }
 }

@@ -9,12 +9,12 @@ import {GuardianRegistry} from "../governance/GuardianRegistry.sol";
 import {DecisionLib} from "../decisions/DecisionLib.sol";
 import {DecisionRegistry} from "../decisions/DecisionRegistry.sol";
 
-/// @title ImperiumMessenger
+/// @title T2TMessenger
 /// @notice Verifica firme 3/5 su decisioni canoniche.
 ///         Non accetta piu' hash opachi: accetta una DecisionLib.Decision
 ///         che viene registrata nel DecisionRegistry e poi verificata.
 ///         Una decisione vetata o scaduta non passa mai, nemmeno con 5/5 firme.
-contract ImperiumMessenger is UUPSUpgradeable, AccessControlUpgradeable {
+contract T2TMessenger is UUPSUpgradeable, AccessControlUpgradeable {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 

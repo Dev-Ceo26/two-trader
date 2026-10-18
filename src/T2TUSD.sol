@@ -8,7 +8,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract IMPUSD is
+contract T2TUSD is
     Initializable,
     ERC20Upgradeable,
     OwnableUpgradeable,
@@ -57,19 +57,19 @@ contract IMPUSD is
 
     // ============ Modifiers ============
     modifier onlyMasterMinter() {
-        require(msg.sender == masterMinter, "IMPUSD: only master minter");
+        require(msg.sender == masterMinter, "T2TUSD: only master minter");
         _;
     }
 
     modifier onlyPauser() {
-        require(msg.sender == pauser, "IMPUSD: only pauser");
+        require(msg.sender == pauser, "T2TUSD: only pauser");
         _;
     }
 
     modifier onlyVaultOrOwner() {
         require(
             msg.sender == owner() || (vaultAuthorized && msg.sender == safeTeamVault),
-            "IMPUSD: only vault or owner"
+            "T2TUSD: only vault or owner"
         );
         _;
     }
@@ -89,12 +89,12 @@ contract IMPUSD is
         address _safeTeamVault,
         address initialOwner
     ) external initializer {
-        require(_usdc != address(0), "IMPUSD: zero usdc");
-        require(_usdt != address(0), "IMPUSD: zero usdt");
-        require(_masterMinter != address(0), "IMPUSD: zero masterMinter");
-        require(_pauser != address(0), "IMPUSD: zero pauser");
+        require(_usdc != address(0), "T2TUSD: zero usdc");
+        require(_usdt != address(0), "T2TUSD: zero usdt");
+        require(_masterMinter != address(0), "T2TUSD: zero masterMinter");
+        require(_pauser != address(0), "T2TUSD: zero pauser");
 
-        __ERC20_init("Imperium USD", "tIMPUSD");
+        __ERC20_init("Two-Trader USD", "tT2TUSD");
         __Ownable_init(initialOwner);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -128,10 +128,10 @@ contract IMPUSD is
         uint256 amount,
         address mintTo
     ) external nonReentrant whenNotPaused returns (uint256 amountMinted) {
-        require(asset == usdc || asset == usdt, "IMPUSD: invalid reserve asset");
-        require(amount > 0, "IMPUSD: amount must be > 0");
-        require(mintTo != address(0), "IMPUSD: mint to zero");
-        require(totalMinted + amount <= MAX_SUPPLY, "IMPUSD: exceeds max supply");
+        require(asset == usdc || asset == usdt, "T2TUSD: invalid reserve asset");
+        require(amount > 0, "T2TUSD: amount must be > 0");
+        require(mintTo != address(0), "T2TUSD: mint to zero");
+        require(totalMinted + amount <= MAX_SUPPLY, "T2TUSD: exceeds max supply");
 
         IERC20(asset).transferFrom(msg.sender, address(this), amount);
 
@@ -160,8 +160,8 @@ contract IMPUSD is
     }
 
     function burnAndWithdrawReserve(uint256 amount) external nonReentrant whenNotPaused {
-        require(amount > 0, "IMPUSD: amount must be > 0");
-        require(balanceOf(msg.sender) >= amount, "IMPUSD: insufficient balance");
+        require(amount > 0, "T2TUSD: amount must be > 0");
+        require(balanceOf(msg.sender) >= amount, "T2TUSD: insufficient balance");
 
         uint256 fee = 0;
         uint256 amountAfterFee = amount;
@@ -227,8 +227,8 @@ contract IMPUSD is
         onlyMasterMinter
         returns (bool)
     {
-        require(_minter != address(0), "IMPUSD: zero minter");
-        require(_allowance > 0, "IMPUSD: allowance must be > 0");
+        require(_minter != address(0), "T2TUSD: zero minter");
+        require(_allowance > 0, "T2TUSD: allowance must be > 0");
         isMinter[_minter] = true;
         minterAllowance[_minter] = _allowance;
         emit MinterConfigured(_minter, _allowance);
@@ -236,7 +236,7 @@ contract IMPUSD is
     }
 
     function removeMinter(address _minter) external onlyMasterMinter returns (bool) {
-        require(isMinter[_minter], "IMPUSD: not a minter");
+        require(isMinter[_minter], "T2TUSD: not a minter");
         isMinter[_minter] = false;
         minterAllowance[_minter] = 0;
         emit MinterRemoved(_minter);
@@ -245,7 +245,7 @@ contract IMPUSD is
 
     // ============ Admin ============
     function setSafeTeamVault(address _vault, bool _authorized) external onlyOwner {
-        require(_vault != address(0), "IMPUSD: zero vault");
+        require(_vault != address(0), "T2TUSD: zero vault");
         safeTeamVault = _vault;
         vaultAuthorized = _authorized;
         emit SafeTeamVaultSet(_vault, _authorized);
@@ -257,31 +257,31 @@ contract IMPUSD is
     }
 
     function setMintFee(uint256 _fee) external onlyVaultOrOwner {
-        require(_fee <= 1000, "IMPUSD: fee too high");
+        require(_fee <= 1000, "T2TUSD: fee too high");
         mintFeeBasisPoints = _fee;
         emit FeeConfigurationUpdated(_fee, burnFeeBasisPoints, feeCollector, feesEnabled);
     }
 
     function setBurnFee(uint256 _fee) external onlyVaultOrOwner {
-        require(_fee <= 1000, "IMPUSD: fee too high");
+        require(_fee <= 1000, "T2TUSD: fee too high");
         burnFeeBasisPoints = _fee;
         emit FeeConfigurationUpdated(mintFeeBasisPoints, _fee, feeCollector, feesEnabled);
     }
 
     function setFeeCollector(address _collector) external onlyVaultOrOwner {
-        require(_collector != address(0), "IMPUSD: zero collector");
+        require(_collector != address(0), "T2TUSD: zero collector");
         feeCollector = _collector;
         emit FeeConfigurationUpdated(mintFeeBasisPoints, burnFeeBasisPoints, _collector, feesEnabled);
     }
 
     function changeMasterMinter(address _newMinter) external onlyMasterMinter {
-        require(_newMinter != address(0), "IMPUSD: zero");
+        require(_newMinter != address(0), "T2TUSD: zero");
         emit MasterMinterChanged(masterMinter, _newMinter);
         masterMinter = _newMinter;
     }
 
     function changePauser(address _newPauser) external onlyMasterMinter {
-        require(_newPauser != address(0), "IMPUSD: zero");
+        require(_newPauser != address(0), "T2TUSD: zero");
         emit PauserChanged(pauser, _newPauser);
         pauser = _newPauser;
     }

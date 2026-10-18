@@ -2,9 +2,9 @@
 pragma solidity 0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {ImperiumPoolManager} from "../../contracts/v4/ImperiumPoolManager.sol";
-import {ImperiumRouter} from "../../contracts/v4/ImperiumRouter.sol";
-import {ImperiumHooks} from "../../contracts/v4/ImperiumHooks.sol";
+import {T2TPoolManager} from "../../contracts/v4/T2TPoolManager.sol";
+import {T2TRouter} from "../../contracts/v4/T2TRouter.sol";
+import {T2THooks} from "../../contracts/v4/T2THooks.sol";
 import {GuardianRegistry} from "../../contracts/governance/GuardianRegistry.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
@@ -68,9 +68,9 @@ contract TestToken {
 }
 
 contract SwapRatioTest is Test {
-    ImperiumPoolManager internal pm;
-    ImperiumRouter internal router;
-    ImperiumHooks internal hook;
+    T2TPoolManager internal pm;
+    T2TRouter internal router;
+    T2THooks internal hook;
     GuardianRegistry internal greg;
     TestToken internal usdc;   // 6 dec
     TestToken internal timp;   // 18 dec
@@ -84,9 +84,9 @@ contract SwapRatioTest is Test {
     function setUp() public {
         vm.deal(deployer, 100 ether);
 
-        // 1. MockUSDC (6 dec) e tIMP (18 dec)
+        // 1. MockUSDC (6 dec) e tTwoTrader (18 dec)
         usdc = new TestToken("MockUSDC", "USDC", 6);
-        timp = new TestToken("Test IMP", "tIMP", 18);
+        timp = new TestToken("Test TwoTrader", "tTwoTrader", 18);
 
         // 2. GuardianRegistry (serve per l'hook)
         GuardianRegistry gregImpl = new GuardianRegistry();
@@ -97,28 +97,28 @@ contract SwapRatioTest is Test {
         greg = GuardianRegistry(address(new ERC1967Proxy(address(gregImpl), regInit)));
 
         // 3. PoolManager
-        ImperiumPoolManager pmImpl = new ImperiumPoolManager();
+        T2TPoolManager pmImpl = new T2TPoolManager();
         bytes memory pmInit = abi.encodeWithSelector(
             bytes4(keccak256("initialize(address)")),
             owner
         );
-        pm = ImperiumPoolManager(address(new ERC1967Proxy(address(pmImpl), pmInit)));
+        pm = T2TPoolManager(address(new ERC1967Proxy(address(pmImpl), pmInit)));
 
         // 4. Hook (con CREATE2 per i flag 0xC0)
         // Nel test il deployer del new{ salt } e' il test contract stesso.
         address create2Deployer = address(this);
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
-        bytes memory creationCode = type(ImperiumHooks).creationCode;
+        bytes memory creationCode = type(T2THooks).creationCode;
         bytes memory args = abi.encode(IPoolManager(address(pm)), greg, owner);
         (, bytes32 salt) = HookMiner.find(create2Deployer, flags, creationCode, args);
-        hook = new ImperiumHooks{salt: salt}(IPoolManager(address(pm)), greg, owner);
+        hook = new T2THooks{salt: salt}(IPoolManager(address(pm)), greg, owner);
 
         // Verifica che i flag siano corretti
         uint160 masked = uint160(address(hook)) & Hooks.ALL_HOOK_MASK;
         require(masked == flags, "HookAddressNotValid in test");
 
         // 5. Router
-        router = new ImperiumRouter(IPoolManager(address(pm)), owner);
+        router = new T2TRouter(IPoolManager(address(pm)), owner);
 
         // 6. Ordina i token
         address token0;
@@ -144,7 +144,7 @@ contract SwapRatioTest is Test {
             hooks: IHooks(address(hook))
         });
 
-        // 8. Inizializza pool al tick -276324 (prezzo 1 tIMP = 1 USDC)
+        // 8. Inizializza pool al tick -276324 (prezzo 1 tTwoTrader = 1 USDC)
         int24 initialTick = -276324;
         SQRT_P_BEFORE = TickMath.getSqrtPriceAtTick(initialTick);
         console.log("=== Inizializzazione pool ===");
@@ -164,7 +164,7 @@ contract SwapRatioTest is Test {
 
         // 10. Mint token al deployer
         usdc.mint(deployer, 1_000_000 * 10 ** 6);   // 1M USDC
-        timp.mint(deployer, 1_000_000 * 10 ** 18);  // 1M tIMP
+        timp.mint(deployer, 1_000_000 * 10 ** 18);  // 1M tTwoTrader
 
         // 11. Approve router
         vm.startPrank(deployer);
@@ -174,24 +174,24 @@ contract SwapRatioTest is Test {
     }
 
     function test_SwapRatio_10_USDC_For_tIMP() public {
-        // === 1. AddLiquidity: 100k tIMP + 100k USDC ===
+        // === 1. AddLiquidity: 100k tTwoTrader + 100k USDC ===
         int24 tickLower;
         int24 tickUpper;
         uint256 amount0;
         uint256 amount1;
 
         if (uint160(address(timp)) < uint160(address(usdc))) {
-            // token0 = tIMP, token1 = USDC
+            // token0 = tTwoTrader, token1 = USDC
             tickLower = -286320;
             tickUpper = -266340;
-            amount0 = 100_000 * 10 ** 18;  // 100k tIMP
+            amount0 = 100_000 * 10 ** 18;  // 100k tTwoTrader
             amount1 = 100_000 * 10 ** 6;   // 100k USDC
         } else {
-            // token0 = USDC, token1 = tIMP
+            // token0 = USDC, token1 = tTwoTrader
             tickLower = 266340;
             tickUpper = 286320;
             amount0 = 100_000 * 10 ** 6;   // 100k USDC
-            amount1 = 100_000 * 10 ** 18;  // 100k tIMP
+            amount1 = 100_000 * 10 ** 18;  // 100k tTwoTrader
         }
 
         console.log("=== AddLiquidity ===");
@@ -216,18 +216,18 @@ contract SwapRatioTest is Test {
 
         console.log("=== Prima dello swap ===");
         console.log("pool USDC:", poolUsdcBefore);
-        console.log("pool tIMP:", poolTimpBefore);
+        console.log("pool tTwoTrader:", poolTimpBefore);
         console.log("deployer USDC:", depUsdcBefore);
-        console.log("deployer tIMP:", depTimpBefore);
+        console.log("deployer tTwoTrader:", depTimpBefore);
 
-        // === 3. Swap: 10 USDC -> tIMP ===
+        // === 3. Swap: 10 USDC -> tTwoTrader ===
         bool zeroForOne = uint160(address(usdc)) < uint160(address(timp)) ? false : true;
-        // Se token0=tIMP, token1=USDC: USDC e' token1 -> zeroForOne = false
-        // Se token0=USDC, token1=tIMP: USDC e' token0 -> zeroForOne = true
+        // Se token0=tTwoTrader, token1=USDC: USDC e' token1 -> zeroForOne = false
+        // Se token0=USDC, token1=tTwoTrader: USDC e' token0 -> zeroForOne = true
         if (uint160(address(timp)) < uint160(address(usdc))) {
-            zeroForOne = false; // USDC (token1) -> tIMP (token0)
+            zeroForOne = false; // USDC (token1) -> tTwoTrader (token0)
         } else {
-            zeroForOne = true;  // USDC (token0) -> tIMP (token1)
+            zeroForOne = true;  // USDC (token0) -> tTwoTrader (token1)
         }
 
         uint256 amountIn = 10 * 10 ** 6; // 10 USDC
@@ -253,26 +253,26 @@ contract SwapRatioTest is Test {
 
         console.log("=== Dopo lo swap ===");
         console.log("pool USDC:", poolUsdcAfter);
-        console.log("pool tIMP:", poolTimpAfter);
+        console.log("pool tTwoTrader:", poolTimpAfter);
         console.log("deployer USDC:", depUsdcAfter);
-        console.log("deployer tIMP:", depTimpAfter);
+        console.log("deployer tTwoTrader:", depTimpAfter);
 
         // === 5. Verifica ===
-        // Atteso: -10 USDC (raw 1e7), +10 tIMP (raw 1e19)
+        // Atteso: -10 USDC (raw 1e7), +10 tTwoTrader (raw 1e19)
         uint256 depUsdcDelta = depUsdcBefore - depUsdcAfter;
         uint256 depTimpDelta = depTimpAfter - depTimpBefore;
 
         console.log("=== Delta deployer ===");
         console.log("USDC out (raw):", depUsdcDelta);
-        console.log("tIMP in (raw):", depTimpDelta);
-        console.log("ratio tIMP/USDC (raw * 1e6):", depTimpDelta / 1e6);
+        console.log("tTwoTrader in (raw):", depTimpDelta);
+        console.log("ratio tTwoTrader/USDC (raw * 1e6):", depTimpDelta / 1e6);
 
-        // Il rapporto ideale e' 1e12 (10 USDC -> 10e18 tIMP raw, 1e6 -> 1e12)
+        // Il rapporto ideale e' 1e12 (10 USDC -> 10e18 tTwoTrader raw, 1e6 -> 1e12)
         // Tolleranza 10% per fee e slippage
         uint256 expectedTimpRaw = amountIn * 1e12;
         uint256 minTimpRaw = expectedTimpRaw * 90 / 100;
 
-        assertGe(depTimpDelta, minTimpRaw, "Output tIMP troppo basso");
-        assertLe(depTimpDelta, expectedTimpRaw * 110 / 100, "Output tIMP troppo alto");
+        assertGe(depTimpDelta, minTimpRaw, "Output tTwoTrader troppo basso");
+        assertLe(depTimpDelta, expectedTimpRaw * 110 / 100, "Output tTwoTrader troppo alto");
     }
 }

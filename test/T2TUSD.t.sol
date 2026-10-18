@@ -2,14 +2,14 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {IMPUSD} from "../src/IMPUSD.sol";
+import {T2TUSD} from "../src/T2TUSD.sol";
 import {MasterMinter} from "../src/MasterMinter.sol";
 import {MockUSDC} from "../src/MockUSDC.sol";
 import {MockUSDT} from "../src/MockUSDT.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract IMPUSDTest is Test {
-    IMPUSD public token;
+contract T2TUSDTest is Test {
+    T2TUSD public token;
     MasterMinter public masterMinter;
     MockUSDC public usdc;
     MockUSDT public usdt;
@@ -30,9 +30,9 @@ contract IMPUSDTest is Test {
         usdt = new MockUSDT(admin);
         masterMinter = new MasterMinter(admin);
 
-        IMPUSD impl = new IMPUSD();
+        T2TUSD impl = new T2TUSD();
         bytes memory initData = abi.encodeWithSelector(
-            IMPUSD.initialize.selector,
+            T2TUSD.initialize.selector,
             address(usdc),
             address(usdt),
             address(masterMinter),
@@ -42,15 +42,15 @@ contract IMPUSDTest is Test {
             admin
         );
         proxy = new ERC1967Proxy(address(impl), initData);
-        token = IMPUSD(address(proxy));
+        token = T2TUSD(address(proxy));
         masterMinter.setToken(address(proxy));
 
         vm.stopPrank();
     }
 
     function testInitialState() public view {
-        assertEq(token.name(), "Imperium USD");
-        assertEq(token.symbol(), "tIMPUSD");
+        assertEq(token.name(), "Two-Trader USD");
+        assertEq(token.symbol(), "tT2TUSD");
         assertEq(token.decimals(), 6);
         assertEq(token.MAX_SUPPLY(), 3_000_000_000 * 10**6);
         assertEq(token.totalSupply(), 0);
@@ -89,7 +89,7 @@ contract IMPUSDTest is Test {
         token.burnAndWithdrawReserve(ONE_USD);
         vm.stopPrank();
 
-        // Brucia 1000 IMPUSD, riceve 500 USDC + 500 USDT (50/50)
+        // Brucia 1000 T2TUSD, riceve 500 USDC + 500 USDT (50/50)
         assertEq(token.balanceOf(user), ONE_USD);
         assertEq(token.totalSupply(), ONE_USD);
         assertEq(usdc.balanceOf(user), ONE_USD - (ONE_USD / 2));
@@ -108,7 +108,7 @@ contract IMPUSDTest is Test {
 
     function testCannotPauseFromNonPauser() public {
         vm.prank(user);
-        vm.expectRevert("IMPUSD: only pauser");
+        vm.expectRevert("T2TUSD: only pauser");
         token.pause();
     }
 
@@ -138,7 +138,7 @@ contract IMPUSDTest is Test {
         vm.startPrank(user);
         bool ok = usdc.approve(address(token), huge);
         require(ok);
-        vm.expectRevert("IMPUSD: exceeds max supply");
+        vm.expectRevert("T2TUSD: exceeds max supply");
         token.depositReserveAndMint(address(usdc), huge, user);
         vm.stopPrank();
     }

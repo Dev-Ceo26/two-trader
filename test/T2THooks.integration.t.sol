@@ -2,8 +2,8 @@
 pragma solidity 0.8.26;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {ImperiumHooks} from "../contracts/v4/ImperiumHooks.sol";
-import {ImperiumPoolManager} from "../contracts/v4/ImperiumPoolManager.sol";
+import {T2THooks} from "../contracts/v4/T2THooks.sol";
+import {T2TPoolManager} from "../contracts/v4/T2TPoolManager.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
@@ -14,25 +14,25 @@ import {GuardianRegistry} from "../contracts/governance/GuardianRegistry.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {HookMiner} from "lib/v4-periphery/test/shared/HookMiner.sol";
 
-contract ImperiumHooksIntegrationTest is Test {
+contract T2THooksIntegrationTest is Test {
     using PoolIdLibrary for PoolKey;
 
-    ImperiumPoolManager internal manager;
-    ImperiumHooks internal hooks;
+    T2TPoolManager internal manager;
+    T2THooks internal hooks;
     GuardianRegistry internal registry;
 
     address internal owner = address(0xA11CE);
     address internal constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
     function setUp() public {
-        // 1) Deploy ImperiumPoolManager via proxy
-        ImperiumPoolManager managerImpl = new ImperiumPoolManager();
+        // 1) Deploy T2TPoolManager via proxy
+        T2TPoolManager managerImpl = new T2TPoolManager();
         bytes memory mInit = abi.encodeWithSelector(
             bytes4(keccak256("initialize(address)")),
             owner
         );
         ERC1967Proxy mProxy = new ERC1967Proxy(address(managerImpl), mInit);
-        manager = ImperiumPoolManager(address(mProxy));
+        manager = T2TPoolManager(address(mProxy));
 
         // 2) Deploy GuardianRegistry via proxy
         GuardianRegistry regImpl = new GuardianRegistry();
@@ -41,9 +41,9 @@ contract ImperiumHooksIntegrationTest is Test {
         ERC1967Proxy rProxy = new ERC1967Proxy(address(regImpl), rInit);
         registry = GuardianRegistry(address(rProxy));
 
-        // 3) Mine + deploy ImperiumHooks con bit 0xC0
+        // 3) Mine + deploy T2THooks con bit 0xC0
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
-        bytes memory creationCode = type(ImperiumHooks).creationCode;
+        bytes memory creationCode = type(T2THooks).creationCode;
         bytes memory constructorArgs = abi.encode(
             IPoolManager(address(manager)), registry, owner
         );
@@ -52,7 +52,7 @@ contract ImperiumHooksIntegrationTest is Test {
             HookMiner.find(CREATE2_DEPLOYER, flags, creationCode, constructorArgs);
 
         vm.prank(CREATE2_DEPLOYER);
-        ImperiumHooks impl = new ImperiumHooks{salt: salt}(
+        T2THooks impl = new T2THooks{salt: salt}(
             IPoolManager(address(manager)), registry, owner
         );
         require(address(impl) == hookAddr, "hook addr mismatch");

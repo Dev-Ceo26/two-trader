@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {ImperiumHooks} from "../contracts/v4/ImperiumHooks.sol";
+import {T2THooks} from "../contracts/v4/T2THooks.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
@@ -15,10 +15,10 @@ import {GuardianRegistry} from "../contracts/governance/GuardianRegistry.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {HookMiner} from "lib/v4-periphery/test/shared/HookMiner.sol";
 
-contract ImperiumHooksTest is Test {
+contract T2THooksTest is Test {
     using PoolIdLibrary for PoolKey;
 
-    ImperiumHooks internal hooks;
+    T2THooks internal hooks;
     GuardianRegistry internal registry;
     address internal poolManagerAddr = address(0xBEEF);
     address internal owner = address(0xA11CE);
@@ -33,9 +33,9 @@ contract ImperiumHooksTest is Test {
         ERC1967Proxy regProxy = new ERC1967Proxy(address(registryImpl), regInit);
         registry = GuardianRegistry(address(regProxy));
 
-        // ImperiumHooks: deploy diretto via CREATE2 con bit 0xC0
+        // T2THooks: deploy diretto via CREATE2 con bit 0xC0
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
-        bytes memory creationCode = type(ImperiumHooks).creationCode;
+        bytes memory creationCode = type(T2THooks).creationCode;
         bytes memory constructorArgs =
             abi.encode(IPoolManager(poolManagerAddr), registry, owner);
 
@@ -43,7 +43,7 @@ contract ImperiumHooksTest is Test {
             HookMiner.find(CREATE2_DEPLOYER, flags, creationCode, constructorArgs);
 
         vm.prank(CREATE2_DEPLOYER);
-        ImperiumHooks impl = new ImperiumHooks{salt: salt}(
+        T2THooks impl = new T2THooks{salt: salt}(
             IPoolManager(poolManagerAddr), registry, owner
         );
         require(address(impl) == hookAddr, "impl mismatch");
@@ -78,7 +78,7 @@ contract ImperiumHooksTest is Test {
         IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
             zeroForOne: true, amountSpecified: 1e18, sqrtPriceLimitX96: 0
         });
-        vm.expectRevert(ImperiumHooks.NotPoolManager.selector);
+        vm.expectRevert(T2THooks.NotPoolManager.selector);
         hooks.beforeSwap(address(this), key, params, "");
     }
 
@@ -102,7 +102,7 @@ contract ImperiumHooksTest is Test {
         });
         vm.prank(poolManagerAddr);
         hooks.beforeSwap(address(this), key, params, "");
-        ImperiumHooks.PoolStats memory s = hooks.getPoolStats(id);
+        T2THooks.PoolStats memory s = hooks.getPoolStats(id);
         assertEq(s.swapCount, 1);
         assertEq(hooks.totalSwaps(), 1);
     }
@@ -118,7 +118,7 @@ contract ImperiumHooksTest is Test {
         (bytes4 sel, int128 hookDelta) = hooks.afterSwap(address(this), key, params, delta, "");
         assertEq(sel, IHooks.afterSwap.selector);
         assertEq(hookDelta, 0);
-        ImperiumHooks.PoolStats memory s = hooks.getPoolStats(id);
+        T2THooks.PoolStats memory s = hooks.getPoolStats(id);
         assertEq(s.volume0, uint256(uint128(1e18)));
         assertEq(s.volume1, uint256(uint128(1e18)));
     }

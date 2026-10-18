@@ -4,16 +4,16 @@ pragma solidity ^0.8.20;
 import {Test, console} from "forge-std/Test.sol";
 import {GuardianRegistry} from "../../contracts/governance/GuardianRegistry.sol";
 import {DecisionRegistry} from "../../contracts/decisions/DecisionRegistry.sol";
-import {ImperiumMessenger} from "../../contracts/bridge/ImperiumMessenger.sol";
-import {ImperiumBridgeRoot} from "../../contracts/bridge/ImperiumBridgeRoot.sol";
+import {T2TMessenger} from "../../contracts/bridge/T2TMessenger.sol";
+import {T2TBridgeRoot} from "../../contracts/bridge/T2TBridgeRoot.sol";
 import {DecisionLib} from "../../contracts/decisions/DecisionLib.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract DecisionCanonTest is Test {
     GuardianRegistry internal registry;
     DecisionRegistry internal decisionRegistry;
-    ImperiumMessenger internal messenger;
-    ImperiumBridgeRoot internal bridgeRoot;
+    T2TMessenger internal messenger;
+    T2TBridgeRoot internal bridgeRoot;
 
     address internal deployer = address(0xA11CE);
 
@@ -65,21 +65,21 @@ contract DecisionCanonTest is Test {
         );
         decisionRegistry = DecisionRegistry(address(new ERC1967Proxy(address(dregImpl), dregInit)));
 
-        // 3. ImperiumMessenger
-        ImperiumMessenger msgImpl = new ImperiumMessenger();
+        // 3. T2TMessenger
+        T2TMessenger msgImpl = new T2TMessenger();
         bytes memory msgInit = abi.encodeWithSelector(
-            ImperiumMessenger.initialize.selector,
+            T2TMessenger.initialize.selector,
             address(registry), address(decisionRegistry), THRESHOLD
         );
-        messenger = ImperiumMessenger(address(new ERC1967Proxy(address(msgImpl), msgInit)));
+        messenger = T2TMessenger(address(new ERC1967Proxy(address(msgImpl), msgInit)));
 
-        // 4. ImperiumBridgeRoot
-        ImperiumBridgeRoot rootImpl = new ImperiumBridgeRoot();
+        // 4. T2TBridgeRoot
+        T2TBridgeRoot rootImpl = new T2TBridgeRoot();
         bytes memory rootInit = abi.encodeWithSelector(
-            ImperiumBridgeRoot.initialize.selector,
+            T2TBridgeRoot.initialize.selector,
             address(messenger), L2_CHAIN_ID, deployer, uint256(10), deployer
         );
-        bridgeRoot = ImperiumBridgeRoot(address(new ERC1967Proxy(address(rootImpl), rootInit)));
+        bridgeRoot = T2TBridgeRoot(address(new ERC1967Proxy(address(rootImpl), rootInit)));
 
         // 5. Registra 5 guardian
         _registerGuardian(g1);

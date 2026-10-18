@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {ImperiumFactory} from "../contracts/maker/ImperiumFactory.sol";
+import {T2TFactory} from "../contracts/maker/T2TFactory.sol";
 
 contract CreatePair is Script {
     function run() external {
@@ -18,7 +18,7 @@ contract CreatePair is Script {
         console.log("Token B:", tokenB);
 
         vm.startBroadcast(pk);
-        address pair = ImperiumFactory(factory).createPair(tokenA, tokenB);
+        address pair = T2TFactory(factory).createPair(tokenA, tokenB);
         vm.stopBroadcast();
 
         console.log("Pair created:", pair);

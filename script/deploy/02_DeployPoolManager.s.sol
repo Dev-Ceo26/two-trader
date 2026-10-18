@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Script, console} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {ImperiumPoolManager} from "../../contracts/v4/ImperiumPoolManager.sol";
+import {T2TPoolManager} from "../../contracts/v4/T2TPoolManager.sol";
 
 contract DeployPoolManager is Script {
     function run() public {
@@ -12,11 +12,11 @@ contract DeployPoolManager is Script {
         vm.startBroadcast();
 
         address poolManager = Upgrades.deployUUPSProxy(
-            "ImperiumPoolManager.sol:ImperiumPoolManager",
+            "T2TPoolManager.sol:T2TPoolManager",
             abi.encodeWithSignature("initialize(address)", deployer)
         );
 
-        console.log("ImperiumPoolManager:", poolManager);
+        console.log("T2TPoolManager:", poolManager);
 
         vm.stopBroadcast();
     }

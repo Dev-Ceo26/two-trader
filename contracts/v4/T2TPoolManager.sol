@@ -12,7 +12,7 @@ import {TickMath} from "v4-core/libraries/TickMath.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {IUnlockCallback} from "v4-core/interfaces/callback/IUnlockCallback.sol";
-import {ImperiumProtocolFees} from "./ImperiumProtocolFees.sol";
+import {T2TProtocolFees} from "./T2TProtocolFees.sol";
 import {ERC6909Claims} from "v4-core/ERC6909Claims.sol";
 import {PoolId} from "v4-core/types/PoolId.sol";
 import {BalanceDelta, BalanceDeltaLibrary} from "v4-core/types/BalanceDelta.sol";
@@ -34,12 +34,12 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 //  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 //                    QUANTUM IMPERIUM CHAIN
 
-/// @title ImperiumPoolManager
+/// @title T2TPoolManager
 /// @notice Holds the state for all pools. UUPS upgradable.
 /// @custom:oz-upgrades-unsafe-allow missing-initializer-call
-contract ImperiumPoolManager is
+contract T2TPoolManager is
     IPoolManager,
-    ImperiumProtocolFees,
+    T2TProtocolFees,
     ERC6909Claims,
     Extsload,
     Exttload,
@@ -71,7 +71,7 @@ contract ImperiumPoolManager is
     }
 
     function initialize(address initialOwner) external initializer {
-        __ImperiumProtocolFees_init(initialOwner);
+        __T2TProtocolFees_init(initialOwner);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}

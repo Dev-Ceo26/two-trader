@@ -10,11 +10,11 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {NoncesUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 
 /**
- * @title IMP — Imperium
- * @notice Token di governance di Quantum Imperium (mainnet).
+ * @title TwoTrader — T2T
+ * @notice Token di governance di Two-Trader (mainnet).
  * @dev UUPS upgradable. Mintable fino a 1B. Burnable. 18 decimali.
  */
-contract IMP is
+contract TwoTrader is
     ERC20Upgradeable,
     ERC20BurnableUpgradeable,
     ERC20PermitUpgradeable,
@@ -42,8 +42,8 @@ contract IMP is
         require(initialHolder != address(0), "holder zero");
         require(initialOwner != address(0), "owner zero");
 
-        __ERC20_init("Imperium", "IMP");
-        __ERC20Permit_init("IMP");
+        __ERC20_init("Two-Trader", "T2T");
+        __ERC20Permit_init("T2T");
         __ERC20Votes_init();
         __Ownable_init(initialOwner);
 

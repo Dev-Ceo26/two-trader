@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {ImperiumRouter} from "../contracts/v4/ImperiumRouter.sol";
+import {T2TRouter} from "../contracts/v4/T2TRouter.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Currency} from "v4-core/types/Currency.sol";
@@ -26,7 +26,7 @@ contract AllowPool is Script {
         });
 
         vm.startBroadcast();
-        ImperiumRouter(router).allowPool(key);
+        T2TRouter(router).allowPool(key);
         console2.log("Pool allowed:");
         console2.log("  token0:", token0);
         console2.log("  token1:", token1);

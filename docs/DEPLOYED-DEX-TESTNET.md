@@ -16,7 +16,7 @@ Explorer: https://explorer-testnet.twotrader-scan.com/
 
 | Campo | Valore |
 |---|---|
-| Token0 | tIMP (0x63B3b910..., 18 dec) |
+| Token0 | tT2T (0x63B3b910..., 18 dec) |
 | Token1 | mUSDC-b (0xFCDE586a..., 6 dec) |
 | Fee | 3000 (0.3%) |
 | TickSpacing | 60 |
@@ -25,22 +25,22 @@ Explorer: https://explorer-testnet.twotrader-scan.com/
 
 ## Whitelist
 
-- allowToken(tIMP) ✅
+- allowToken(tT2T) ✅
 - allowToken(mUSDC-b) ✅
-- allowPair(tIMP, mUSDC-b) ✅
+- allowPair(tT2T, mUSDC-b) ✅
 - allowPool(pool) ✅
 
 ## AddLiquidity
 
-- 100.000 tIMP + 100.000 mUSDC
+- 100.000 tT2T + 100.000 mUSDC
 - Range: [-286320, -266340] (±10.000 tick)
 
 ## TestSwap
 
-- Swap: 10 mUSDC → ~102,8 tIMP
-- Rapporto: ~10,28 tIMP/USDC
+- Swap: 10 mUSDC → ~102,8 tT2T
+- Rapporto: ~10,28 tT2T/USDC
 
-**Nota:** il test Foundry `SwapRatioTest` dava 9,97 tIMP per 10 USDC (rapporto ~1:1).
+**Nota:** il test Foundry `SwapRatioTest` dava 9,97 tT2T per 10 USDC (rapporto ~1:1).
 La differenza tra test e chain reale e' da investigare.
 Il DEX e' tecnicamente funzionante: pool, hook, swap, transfer tutti corretti.
 

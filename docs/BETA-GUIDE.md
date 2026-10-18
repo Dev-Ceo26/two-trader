@@ -24,9 +24,9 @@ Niente payload opachi. Niente "firma qualunque cosa".
    - Nome: TWOTRADER Testnet
    - RPC: [vedi docs/RPC.md]
    - Chain ID: 9818
-   - Symbol: IMP
+   - Symbol: T2T
 
-2. Ottieni IMP per il gas: chiedi al deployer
+2. Ottieni T2T per il gas: chiedi al deployer
    `0x8d2eD8c03c62407fae385E32121172b3b12ff484`
 
 ---
@@ -52,7 +52,7 @@ Niente payload opachi. Niente "firma qualunque cosa".
 ### Token
 | Token | Indirizzo |
 |---|---|
-| tIMP (18 dec) | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B |
+| tT2T (18 dec) | 0x63B3b910be2Ef843dbE920Df2CcC032fe5143A6B |
 | mUSDC-b (6 dec) | 0xFCDE586a3f72d535902E8197AE3effeb4a3E9171 |
 
 ### Governance
@@ -98,13 +98,13 @@ text
 2. Chiama `swapExactInput`:
 Router.swapExactInput(
 PoolKey({
-currency0: tIMP,
+currency0: tT2T,
 currency1: mUSDC-b,
 fee: 3000,
 tickSpacing: 60,
 hooks: 0xc6c21de8...
 }),
-false, // zeroForOne (USDC -> tIMP)
+false, // zeroForOne (USDC -> tT2T)
 10000000, // amountIn
 0, // amountOutMin
 tuo-indirizzo, // recipient
@@ -113,7 +113,7 @@ block.timestamp + 600
 
 text
 
-3. Verifica il saldo tIMP dopo lo swap.
+3. Verifica il saldo tT2T dopo lo swap.
 
 ---
 

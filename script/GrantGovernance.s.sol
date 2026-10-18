@@ -4,9 +4,9 @@ pragma solidity ^0.8.20;
 import {Script, console} from "forge-std/Script.sol";
 import {GuardianRegistry} from "../contracts/governance/GuardianRegistry.sol";
 import {DecisionRegistry} from "../contracts/decisions/DecisionRegistry.sol";
-import {ImperiumMessenger} from "../contracts/bridge/ImperiumMessenger.sol";
-import {ImperiumBridgeRoot} from "../contracts/bridge/ImperiumBridgeRoot.sol";
-import {ImperiumBridgeChild} from "../contracts/bridge/ImperiumBridgeChild.sol";
+import {T2TMessenger} from "../contracts/bridge/T2TMessenger.sol";
+import {T2TBridgeRoot} from "../contracts/bridge/T2TBridgeRoot.sol";
+import {T2TBridgeChild} from "../contracts/bridge/T2TBridgeChild.sol";
 
 /// @title GrantGovernance
 /// @notice Fase 1 di PromoteGovernance.

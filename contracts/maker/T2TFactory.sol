@@ -4,14 +4,14 @@ pragma solidity ^0.8.26;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {ImperiumPair} from "./ImperiumPair.sol";
+import {T2TPair} from "./T2TPair.sol";
 
 /**
- * @title ImperiumFactory
- * @notice Factory per creare coppie AMM (ImperiumPair).
+ * @title T2TFactory
+ * @notice Factory per creare coppie AMM (T2TPair).
  * @dev UUPS upgradable. createPair deploya IMPLEMENTATION + PROXY on-chain (nativo).
  */
-contract ImperiumFactory is UUPSUpgradeable, OwnableUpgradeable {
+contract T2TFactory is UUPSUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_FEE_BPS = 1000; // 10% max
 
     address[] public allPairs;
@@ -64,11 +64,11 @@ contract ImperiumFactory is UUPSUpgradeable, OwnableUpgradeable {
         require(getPair[t0][t1] == address(0), "pair exists");
 
         // 1. Deploy implementation
-        ImperiumPair impl = new ImperiumPair();
+        T2TPair impl = new T2TPair();
 
         // 2. Deploy proxy + initialize
         bytes memory initData = abi.encodeCall(
-            ImperiumPair.initialize,
+            T2TPair.initialize,
             (t0, t1, owner(), defaultFeeBps)
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);

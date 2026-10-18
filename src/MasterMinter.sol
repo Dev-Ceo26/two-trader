@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IIMPUSD {
+interface IT2TUSD {
     function configureMinter(address minter, uint256 allowance) external returns (bool);
     function removeMinter(address minter) external returns (bool);
     function isMinter(address account) external view returns (bool);
@@ -11,7 +11,7 @@ interface IIMPUSD {
 }
 
 contract MasterMinter is Ownable {
-    IIMPUSD public token;
+    IT2TUSD public token;
 
     event MinterConfigured(address indexed minter, uint256 allowance);
     event MinterRemoved(address indexed minter);
@@ -21,7 +21,7 @@ contract MasterMinter is Ownable {
 
     function setToken(address _token) external onlyOwner {
         require(_token != address(0), "MasterMinter: zero token");
-        token = IIMPUSD(_token);
+        token = IT2TUSD(_token);
         emit TokenSet(_token);
     }
 

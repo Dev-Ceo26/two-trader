@@ -14,7 +14,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {LiquidityAmounts} from "v4-periphery/libraries/LiquidityAmounts.sol";
 import {TickMath} from "v4-core/libraries/TickMath.sol";
 
-contract ImperiumRouter is IUnlockCallback, Ownable, ReentrancyGuard {
+contract T2TRouter is IUnlockCallback, Ownable, ReentrancyGuard {
     modifier onlyPoolManager() {
         if (msg.sender != address(poolManager)) revert NotPoolManager();
         _;

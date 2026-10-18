@@ -6,7 +6,7 @@
 
 | # | Contratto | Indirizzo |
 |---|---|---|
-| 1 | tIMP | 0x1cd924f0d21a59d7a87bf401604de74bc2d7dd24 |
+| 1 | tT2T | 0x1cd924f0d21a59d7a87bf401604de74bc2d7dd24 |
 | 2 | Vault | 0x9a2cedf66763c93cf03615d333b5f8416f68d7fe |
 | 3 | FeeDistributor | 0x200c1771b4c6ba4b24f41f8f3a447bf7585dd2af |
 | 4 | Factory | 0xbf59c83598dbb62f6137de18292dce82d27afeca |
@@ -27,6 +27,6 @@
 
 ## Collegamenti
 
-- tIMP.faucet() → 0xf0436822e10e17FECc5DEC8097f370e63392B12C
-- tIMP.bridge() → 0x83d10a689994430Ebb1c4A8C01Fb09b82e5aDA90
+- tT2T.faucet() → 0xf0436822e10e17FECc5DEC8097f370e63392B12C
+- tT2T.bridge() → 0x83d10a689994430Ebb1c4A8C01Fb09b82e5aDA90
 - Router.poolManager() → 0x4D91F584A3f677864f25e7b5cbc45399C5109Edc

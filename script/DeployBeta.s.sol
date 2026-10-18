@@ -6,9 +6,9 @@ import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {GuardianRegistry} from "../contracts/governance/GuardianRegistry.sol";
 import {DecisionRegistry} from "../contracts/decisions/DecisionRegistry.sol";
 import {DecisionLib} from "../contracts/decisions/DecisionLib.sol";
-import {ImperiumMessenger} from "../contracts/bridge/ImperiumMessenger.sol";
-import {ImperiumBridgeRoot} from "../contracts/bridge/ImperiumBridgeRoot.sol";
-import {ImperiumBridgeChild} from "../contracts/bridge/ImperiumBridgeChild.sol";
+import {T2TMessenger} from "../contracts/bridge/T2TMessenger.sol";
+import {T2TBridgeRoot} from "../contracts/bridge/T2TBridgeRoot.sol";
+import {T2TBridgeChild} from "../contracts/bridge/T2TBridgeChild.sol";
 
 /// @title DeployBeta
 /// @notice Deploy Fase A: tutto con deployer come governor.
@@ -66,35 +66,35 @@ contract DeployBeta is Script {
         );
         console.log("DecisionRegistry: ", decisionRegistry);
 
-        // 3. ImperiumMessenger
+        // 3. T2TMessenger
         address messenger = Upgrades.deployUUPSProxy(
-            "ImperiumMessenger.sol:ImperiumMessenger",
+            "T2TMessenger.sol:T2TMessenger",
             abi.encodeCall(
-                ImperiumMessenger.initialize,
+                T2TMessenger.initialize,
                 (guardianRegistry, decisionRegistry, threshold)
             )
         );
-        console.log("ImperiumMessenger:", messenger);
+        console.log("T2TMessenger:", messenger);
 
-        // 4. ImperiumBridgeRoot (5 parametri: messenger, l2ChainId, governor, feeBps, feeRecipient)
+        // 4. T2TBridgeRoot (5 parametri: messenger, l2ChainId, governor, feeBps, feeRecipient)
         address bridgeRoot = Upgrades.deployUUPSProxy(
-            "ImperiumBridgeRoot.sol:ImperiumBridgeRoot",
+            "T2TBridgeRoot.sol:T2TBridgeRoot",
             abi.encodeCall(
-                ImperiumBridgeRoot.initialize,
+                T2TBridgeRoot.initialize,
                 (messenger, l2ChainId, deployer, feeBps, feeRecipient)
             )
         );
-        console.log("ImperiumBridgeRoot:", bridgeRoot);
+        console.log("T2TBridgeRoot:", bridgeRoot);
 
-        // 5. ImperiumBridgeChild (5 parametri: messenger, l1ChainId, governor, feeBps, feeRecipient)
+        // 5. T2TBridgeChild (5 parametri: messenger, l1ChainId, governor, feeBps, feeRecipient)
         address bridgeChild = Upgrades.deployUUPSProxy(
-            "ImperiumBridgeChild.sol:ImperiumBridgeChild",
+            "T2TBridgeChild.sol:T2TBridgeChild",
             abi.encodeCall(
-                ImperiumBridgeChild.initialize,
+                T2TBridgeChild.initialize,
                 (messenger, l1ChainId, deployer, feeBps, feeRecipient)
             )
         );
-        console.log("ImperiumBridgeChild:", bridgeChild);
+        console.log("T2TBridgeChild:", bridgeChild);
 
         vm.stopBroadcast();
 
@@ -109,9 +109,9 @@ contract DeployBeta is Script {
         console.log("\n=== DEPLOY BETA v1.2 COMPLETO ===");
         console.log("GuardianRegistry: ", d.guardianRegistry);
         console.log("DecisionRegistry: ", d.decisionRegistry);
-        console.log("ImperiumMessenger:", d.messenger);
-        console.log("ImperiumBridgeRoot: ", d.bridgeRoot);
-        console.log("ImperiumBridgeChild:", d.bridgeChild);
+        console.log("T2TMessenger:", d.messenger);
+        console.log("T2TBridgeRoot: ", d.bridgeRoot);
+        console.log("T2TBridgeChild:", d.bridgeChild);
         console.log("\nTutti i GOVERNOR_ROLE sono su:", deployer);
         console.log("Fee BPS:", feeBps);
         console.log("Fee recipient:", feeRecipient);

@@ -12,7 +12,7 @@ import {Pool} from "v4-core/libraries/Pool.sol";
 import {CustomRevert} from "v4-core/libraries/CustomRevert.sol";
 
 /// @notice Contract handling the setting and accrual of protocol fees
-abstract contract ImperiumProtocolFees is IProtocolFees, OwnableUpgradeable {
+abstract contract T2TProtocolFees is IProtocolFees, OwnableUpgradeable {
     using ProtocolFeeLibrary for uint24;
     using Pool for Pool.State;
     using CustomRevert for bytes4;
@@ -29,7 +29,7 @@ abstract contract ImperiumProtocolFees is IProtocolFees, OwnableUpgradeable {
     }
 
     /// @custom:oz-upgrades-unsafe-allow missing-initializer-call
-    function __ImperiumProtocolFees_init(address initialOwner) internal onlyInitializing {
+    function __T2TProtocolFees_init(address initialOwner) internal onlyInitializing {
         __Ownable_init(initialOwner);
     }
 

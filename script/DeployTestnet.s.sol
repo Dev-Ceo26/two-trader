@@ -3,11 +3,11 @@ pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {tIMP} from "../contracts/token/tIMP.sol";
-import {IMPStaking} from "../contracts/staking/IMPStaking.sol";
-import {ImperiumVault} from "../contracts/vault/ImperiumVault.sol";
+import {tTwoTrader} from "../contracts/token/tTwoTrader.sol";
+import {T2TStaking} from "../contracts/staking/T2TStaking.sol";
+import {T2TVault} from "../contracts/vault/T2TVault.sol";
 import {FeeDistributor} from "../contracts/distribution/FeeDistributor.sol";
-import {ImperiumFactory} from "../contracts/maker/ImperiumFactory.sol";
+import {T2TFactory} from "../contracts/maker/T2TFactory.sol";
 
 contract DeployTestnet is Script {
     function run() public {
@@ -15,17 +15,17 @@ contract DeployTestnet is Script {
 
         vm.startBroadcast();
 
-        // 1. tIMP
+        // 1. tTwoTrader
         address timp = Upgrades.deployUUPSProxy(
-            "tIMP.sol:tIMP",
-            abi.encodeCall(tIMP.initialize, (deployer, deployer, deployer))
+            "tTwoTrader.sol:tTwoTrader",
+            abi.encodeCall(tTwoTrader.initialize, (deployer, deployer, deployer))
         );
-        console.log("tIMP:", timp);
+        console.log("tTwoTrader:", timp);
 
         // 2. Vault
         address vault = Upgrades.deployUUPSProxy(
-            "ImperiumVault.sol:ImperiumVault",
-            abi.encodeCall(ImperiumVault.initialize, (deployer))
+            "T2TVault.sol:T2TVault",
+            abi.encodeCall(T2TVault.initialize, (deployer))
         );
         console.log("Vault:", vault);
 
@@ -38,22 +38,22 @@ contract DeployTestnet is Script {
 
         // 4. Factory
         address factory = Upgrades.deployUUPSProxy(
-            "ImperiumFactory.sol:ImperiumFactory",
-            abi.encodeCall(ImperiumFactory.initialize, (deployer))
+            "T2TFactory.sol:T2TFactory",
+            abi.encodeCall(T2TFactory.initialize, (deployer))
         );
         console.log("Factory:", factory);
 
-        // 5. Staking (usa lo stesso tIMP)
+        // 5. Staking (usa lo stesso tTwoTrader)
         address staking = Upgrades.deployUUPSProxy(
-            "IMPStaking.sol:IMPStaking",
-            abi.encodeCall(IMPStaking.initialize, (timp, deployer, 7 days))
+            "T2TStaking.sol:T2TStaking",
+            abi.encodeCall(T2TStaking.initialize, (timp, deployer, 7 days))
         );
         console.log("Staking:", staking);
 
         vm.stopBroadcast();
 
         console.log("\n=== DEPLOY TESTNET COMPLETO ===");
-        console.log("tIMP:          ", timp);
+        console.log("tTwoTrader:          ", timp);
         console.log("Vault:         ", vault);
         console.log("FeeDistributor:", feeDist);
         console.log("Factory:       ", factory);
